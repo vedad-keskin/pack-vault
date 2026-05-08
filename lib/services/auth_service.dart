@@ -35,8 +35,8 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Try to login; if user doesn't exist, register automatically.
-  Future<bool> loginOrRegister(String username, String password) async {
+  /// Login an existing user.
+  Future<bool> login(String username, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -44,20 +44,19 @@ class AuthService extends ChangeNotifier {
     final email = _toEmail(username);
 
     try {
-      // Try login first
       final cred = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
       _user = cred.user;
       _username = username;
+      _isLoading = false;
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        // Register new user
-        return _register(username, email, password);
-      } else if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+      if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
+        _error = 'User not found or wrong password.';
+      } else if (e.code == 'wrong-password') {
         _error = 'Wrong password. Try again.';
       } else {
         _error = 'Login failed: ${e.message}';
@@ -72,7 +71,14 @@ class AuthService extends ChangeNotifier {
     return false;
   }
 
-  Future<bool> _register(String username, String email, String password) async {
+  /// Register a new user and initialize their card collection.
+  Future<bool> register(String username, String password) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final email = _toEmail(username);
+
     try {
       final cred = await _auth.createUserWithEmailAndPassword(
         email: email,

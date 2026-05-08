@@ -129,9 +129,10 @@ class LoginScreen extends StatelessWidget {
                         return LoginForm(
                           isLoading: auth.isLoading,
                           error: auth.error,
-                          onSubmit: (username, password) async {
-                            final success =
-                                await auth.loginOrRegister(username, password);
+                          onSubmit: (username, password, isRegister) async {
+                            final success = isRegister
+                                ? await auth.register(username, password)
+                                : await auth.login(username, password);
                             if (success && context.mounted) {
                               _navigateToAlbum(context);
                             }

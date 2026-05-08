@@ -5,6 +5,7 @@ import 'package:pack_vault/firebase_options.dart';
 import 'package:pack_vault/core/theme/app_theme.dart';
 import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/services/collection_service.dart';
+import 'package:pack_vault/data/repositories/card_repository.dart';
 import 'package:pack_vault/features/auth/login_screen.dart';
 import 'package:pack_vault/features/album/album_screen.dart';
 
@@ -21,6 +22,9 @@ void main() async {
     debugPrint('Firebase init failed: $e');
     debugPrint('Run: flutterfire configure --project=YOUR_PROJECT_ID');
   }
+
+  // Load card database (player names from JSON)
+  await CardRepository.loadCards();
 
   runApp(PackVaultApp(firebaseReady: firebaseReady));
 }

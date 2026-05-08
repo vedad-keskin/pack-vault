@@ -11,39 +11,36 @@ class AlbumPageTransformer {
     final pos = position.clamp(-1.0, 1.0);
     final absPos = pos.abs();
 
+    // Skip transform entirely when nearly settled to avoid artifacts
+    if (absPos < 0.005) return child;
+
     // Slight scale reduction for pages going out
-    final scale = 1.0 - (absPos * 0.08);
+    final scale = 1.0 - (absPos * 0.06);
 
-    // 3D rotation around Y axis for page-flip feel
-    final rotationY = pos * 0.4; // radians
-
-    // Depth translation
-    final translateZ = -absPos * 60;
+    // Gentler 3D rotation around Y axis
+    final rotationY = pos * 0.3;
 
     // Shadow opacity based on position
-    final shadowOpacity = (absPos * 0.4).clamp(0.0, 0.35);
+    final shadowOpacity = (absPos * 0.35).clamp(0.0, 0.3);
 
     return Transform(
       alignment: pos < 0 ? Alignment.centerRight : Alignment.centerLeft,
       transform: Matrix4.identity()
-        ..setEntry(3, 2, 0.002) // perspective
+        ..setEntry(3, 2, 0.001) // lighter perspective
         ..rotateY(rotationY)
-        ..scaleByVector3(Vector3(scale, scale, 1.0))
-        ..translateByVector3(Vector3(0.0, 0.0, translateZ)),
+        ..scaleByVector3(Vector3(scale, scale, 1.0)),
       child: Stack(
         children: [
           child,
           // Shadow overlay for depth
-          if (absPos > 0.01)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: shadowOpacity),
-                  ),
-                ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: shadowOpacity,
+                child: const ColoredBox(color: Colors.black),
               ),
             ),
+          ),
         ],
       ),
     );

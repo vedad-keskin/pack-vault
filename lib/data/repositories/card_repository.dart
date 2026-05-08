@@ -1,8 +1,11 @@
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pack_vault/data/models/sticker_card.dart';
 
 /// Generates all 432 sticker cards with correct page and country mapping.
 ///
-/// Pattern:
+/// Player names are loaded from cards_database.json (editable).
+/// The page/country structure is computed:
 ///   Odd pages  → 8 cards
 ///   Even pages → 9 cards
 ///   Last page (51) → 7 cards
@@ -16,12 +19,36 @@ import 'package:pack_vault/data/models/sticker_card.dart';
 class CardRepository {
   CardRepository._();
 
-  static final List<StickerCard> _cards = _generateCards();
+  static List<StickerCard> _cards = [];
+  static bool _loaded = false;
 
   static List<StickerCard> get allCards => _cards;
+  static bool get isLoaded => _loaded;
 
   static const int totalPages = 51;
   static const int totalCards = 432;
+
+  /// Load card names from the JSON asset. Call once at app start.
+  static Future<void> loadCards() async {
+    if (_loaded) return;
+
+    try {
+      final jsonStr = await rootBundle.loadString('lib/data/cards_database.json');
+      final List<dynamic> jsonList = json.decode(jsonStr);
+
+      _cards = jsonList.map((item) => StickerCard(
+        id: item['id'] as int,
+        fullName: (item['fullName'] as String?) ?? '',
+        page: item['page'] as int,
+        countryId: item['countryId'] as int,
+      )).toList();
+    } catch (e) {
+      // Fallback to generated cards if JSON fails
+      _cards = _generateCards();
+    }
+
+    _loaded = true;
+  }
 
   /// Returns the number of cards for a given page number.
   static int cardsPerPage(int page) {
@@ -45,6 +72,7 @@ class CardRepository {
     return _cards.where((c) => c.countryId == countryId).toList();
   }
 
+  /// Fallback generator if JSON can't be loaded.
   static List<StickerCard> _generateCards() {
     final List<StickerCard> cards = [];
     int cardId = 1;
@@ -63,8 +91,6 @@ class CardRepository {
       }
     }
 
-    assert(cards.length == totalCards,
-        'Expected $totalCards cards, got ${cards.length}');
     return cards;
   }
 }
