@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "916401617246",
+    "firebase_url": "https://nighfall-project-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "nighfall-project",
+    "storage_bucket": "nighfall-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916401617246:android:81ca4a552ff879affff7cf",
+        "android_client_info": {
+          "package_name": "com.nightfall.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKAeaLb1QfZ7bSHkSiTkUR1LY_g0eqPAg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,99 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:pack_vault/core/constants/app_constants.dart';
+
+/// Top bar showing overall collection progress and stats.
+class CollectionStats extends StatelessWidget {
+  final int collectedCount;
+  final int totalCards;
+  final String username;
+  final VoidCallback onLogout;
+
+  const CollectionStats({
+    super.key,
+    required this.collectedCount,
+    required this.totalCards,
+    required this.username,
+    required this.onLogout,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = totalCards > 0 ? collectedCount / totalCards : 0.0;
+    final pct = (progress * 100).toStringAsFixed(1);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.9),
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.pitchGreen.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Row(
+          children: [
+            // User info
+            const Icon(Icons.sports_soccer,
+                color: AppColors.pitchGreenGlow, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              username,
+              style: GoogleFonts.outfit(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Progress bar
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: AppColors.cardBorderUncollected,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        progress >= 1.0
+                            ? AppColors.goalGold
+                            : AppColors.pitchGreenGlow,
+                      ),
+                      minHeight: 6,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '$collectedCount/$totalCards ($pct%)',
+                    style: GoogleFonts.orbitron(
+                      color: AppColors.textMuted,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // Logout
+            IconButton(
+              onPressed: onLogout,
+              icon: const Icon(Icons.logout,
+                  color: AppColors.textMuted, size: 20),
+              tooltip: 'Logout',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
