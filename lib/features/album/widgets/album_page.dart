@@ -37,28 +37,45 @@ class AlbumPage extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-                CountryHeader(
-                  country: country,
-                  collectedCount: countryCollected,
-                  totalCount: countryCards.length,
-                  pageNumber: pageNumber,
-                  totalPages: CardRepository.totalPages,
+          child: Column(
+            children: [
+              // Header stays fixed at top
+              const SizedBox(height: 8),
+              CountryHeader(
+                country: country,
+                collectedCount: countryCollected,
+                totalCount: countryCards.length,
+                pageNumber: pageNumber,
+                totalPages: CardRepository.totalPages,
+              ),
+              const SizedBox(height: 10),
+
+              // Cards section: centered vertically in remaining space
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (isOddPage)
+                              _buildOddPageLayout(cards, collection)
+                            else
+                              _buildEvenPageGrid(cards, collection),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 10),
-
-                if (isOddPage)
-                  _buildOddPageLayout(cards, collection)
-                else
-                  _buildEvenPageGrid(cards, collection),
-
-                const SizedBox(height: 8),
-              ],
-            ),
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
         );
       },
