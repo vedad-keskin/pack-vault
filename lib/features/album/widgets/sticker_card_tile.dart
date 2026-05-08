@@ -9,12 +9,14 @@ class StickerCardTile extends StatefulWidget {
   final StickerCard card;
   final bool isCollected;
   final VoidCallback onToggle;
+  final bool isBig;
 
   const StickerCardTile({
     super.key,
     required this.card,
     required this.isCollected,
     required this.onToggle,
+    this.isBig = false,
   });
 
   @override
@@ -57,6 +59,12 @@ class _StickerCardTileState extends State<StickerCardTile>
   @override
   Widget build(BuildContext context) {
     final collected = widget.isCollected;
+    final big = widget.isBig;
+
+    // Scale sizes based on big/regular
+    final numberSize = big ? 22.0 : 17.0;
+    final nameSize = big ? 13.0 : 11.0;
+    final iconSize = big ? 28.0 : 24.0;
 
     return AnimatedBuilder(
       animation: _scaleAnimation,
@@ -119,57 +127,58 @@ class _StickerCardTileState extends State<StickerCardTile>
 
               // Card content
               Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Card number
-                    Text(
-                      '#${widget.card.id}',
-                      style: GoogleFonts.orbitron(
-                        color: collected
-                            ? AppColors.goalGold
-                            : AppColors.textMuted,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: big ? 8 : 4),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Card number
+                      Text(
+                        '#${widget.card.id}',
+                        style: GoogleFonts.orbitron(
+                          color: collected
+                              ? AppColors.goalGold
+                              : AppColors.textMuted,
+                          fontSize: numberSize,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    // Player name or placeholder
-                    if (widget.card.fullName.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
+                      SizedBox(height: big ? 8 : 4),
+                      // Player name or placeholder
+                      if (widget.card.fullName.isNotEmpty)
+                        Text(
                           widget.card.fullName,
                           style: GoogleFonts.inter(
                             color: collected
                                 ? AppColors.textPrimary
                                 : AppColors.textMuted,
-                            fontSize: 9,
+                            fontSize: nameSize,
+                            fontWeight: big ? FontWeight.w500 : FontWeight.normal,
                           ),
                           textAlign: TextAlign.center,
-                          maxLines: 2,
+                          maxLines: big ? 3 : 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                      SizedBox(height: big ? 10 : 6),
+                      // Collected indicator
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        child: collected
+                            ? Icon(
+                                Icons.check_circle,
+                                key: const ValueKey('collected'),
+                                color: AppColors.pitchGreenGlow,
+                                size: iconSize,
+                              )
+                            : Icon(
+                                Icons.radio_button_unchecked,
+                                key: const ValueKey('uncollected'),
+                                color: AppColors.textMuted.withValues(alpha: 0.5),
+                                size: iconSize,
+                              ),
                       ),
-                    const SizedBox(height: 6),
-                    // Collected indicator
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      child: collected
-                          ? const Icon(
-                              Icons.check_circle,
-                              key: ValueKey('collected'),
-                              color: AppColors.pitchGreenGlow,
-                              size: 22,
-                            )
-                          : Icon(
-                              Icons.radio_button_unchecked,
-                              key: const ValueKey('uncollected'),
-                              color: AppColors.textMuted.withValues(alpha: 0.5),
-                              size: 22,
-                            ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
