@@ -1,4 +1,4 @@
-package com.example.pack_vault
+package com.packvault.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "696407003370",
+    "firebase_url": "https://pack-vault-be672-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "pack-vault-be672",
+    "storage_bucket": "pack-vault-be672.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:696407003370:android:9ff6cca29d809c1bc04793",
+        "android_client_info": {
+          "package_name": "com.packvault.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7AblVZQuTRyOnpTkLINeJgBMMG0gnl4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

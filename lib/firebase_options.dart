@@ -1,12 +1,3 @@
-// ============================================================
-// PLACEHOLDER — Replace this file by running:
-//   flutterfire configure --project=YOUR_FIREBASE_PROJECT_ID
-//
-// This will auto-generate the correct options for your project.
-// Until then, Firebase.initializeApp() will use this placeholder
-// and fail gracefully (the app handles the error).
-// ============================================================
-
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
@@ -23,23 +14,23 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // TODO: Replace with your actual Firebase config values
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_ANDROID_API_KEY',
-    appId: 'YOUR_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    databaseURL: 'YOUR_DATABASE_URL',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyB7AblVZQuTRyOnpTkLINeJgBMMG0gnl4A',
+    appId: '1:696407003370:android:9ff6cca29d809c1bc04793',
+    messagingSenderId: '696407003370',
+    projectId: 'pack-vault-be672',
+    databaseURL: 'https://pack-vault-be672-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'pack-vault-be672.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_IOS_API_KEY',
-    appId: 'YOUR_IOS_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    databaseURL: 'YOUR_DATABASE_URL',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyD9j4YmwqIHqmznDfggfmYWV4bMAeTmfNA',
+    appId: '1:696407003370:ios:cc8b4415f4046e01c04793',
+    messagingSenderId: '696407003370',
+    projectId: 'pack-vault-be672',
+    databaseURL: 'https://pack-vault-be672-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'pack-vault-be672.firebasestorage.app',
     iosBundleId: 'com.packvault.app',
   );
+
 }
