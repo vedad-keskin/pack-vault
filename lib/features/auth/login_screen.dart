@@ -6,6 +6,7 @@ import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/services/collection_service.dart';
 import 'package:pack_vault/features/auth/widgets/stadium_intro.dart';
 import 'package:pack_vault/features/auth/widgets/login_form.dart';
+import 'package:pack_vault/features/auth/register_screen.dart';
 import 'package:pack_vault/features/album/album_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -26,6 +27,27 @@ class LoginScreen extends StatelessWidget {
               parent: animation,
               curve: Curves.easeInOut,
             ),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  void _navigateToRegister(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 500),
+        pageBuilder: (_, a, b) => const RegisterScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
             child: child,
           );
         },
@@ -66,73 +88,60 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo area
+                    // Logo
                     Container(
-                      width: 90,
-                      height: 90,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.pitchGreenLight,
-                            AppColors.pitchGreen,
-                          ],
-                        ),
+                        borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color:
-                                AppColors.pitchGreenGlow.withValues(alpha: 0.3),
-                            blurRadius: 24,
+                            color: AppColors.firePrimary.withValues(alpha: 0.15),
+                            blurRadius: 30,
                             spreadRadius: 4,
                           ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.sports_soccer,
-                        size: 48,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'PACK VAULT',
-                      style: GoogleFonts.orbitron(
-                        color: AppColors.textPrimary,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 4,
-                        shadows: [
-                          Shadow(
-                            color:
-                                AppColors.pitchGreenGlow.withValues(alpha: 0.4),
-                            blurRadius: 20,
+                          BoxShadow(
+                            color: AppColors.goalGold.withValues(alpha: 0.08),
+                            blurRadius: 50,
+                            spreadRadius: 8,
                           ),
                         ],
                       ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/logo.png',
+                          width: 130,
+                          height: 130,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 24),
                     Text(
                       'Sticker Album Collection Tracker',
                       style: GoogleFonts.inter(
                         color: AppColors.textSecondary,
-                        fontSize: 14,
+                        fontSize: 13,
                         letterSpacing: 1,
                       ),
                     ),
-                    const SizedBox(height: 44),
+                    const SizedBox(height: 36),
 
-                    // Login form
+                    // Login form (login only — no register)
                     Consumer<AuthService>(
                       builder: (context, auth, _) {
                         return LoginForm(
                           isLoading: auth.isLoading,
                           error: auth.error,
-                          onSubmit: (username, password, isRegister) async {
-                            final success = isRegister
-                                ? await auth.register(username, password)
-                                : await auth.login(username, password);
+                          onSubmit: (username, password) async {
+                            // Admin backdoor → register screen
+                            if (username == 'admin' && password == 'admin') {
+                              if (context.mounted) {
+                                _navigateToRegister(context);
+                              }
+                              return false;
+                            }
+
+                            final success = await auth.login(username, password);
                             if (success && context.mounted) {
                               _navigateToAlbum(context);
                             }

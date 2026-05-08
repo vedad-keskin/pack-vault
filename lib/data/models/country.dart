@@ -20,7 +20,7 @@ class Country {
     Country(id: 8, name: 'Germany', flagEmoji: '🇩🇪'),
     Country(id: 9, name: 'Netherlands', flagEmoji: '🇳🇱'),
     Country(id: 10, name: 'Japan', flagEmoji: '🇯🇵'),
-    Country(id: 11, name: 'Tunis', flagEmoji: '🇹🇳'),
+    Country(id: 11, name: 'Tunisia', flagEmoji: '🇹🇳'),
     Country(id: 12, name: 'Belgium', flagEmoji: '🇧🇪'),
     Country(id: 13, name: 'Senegal', flagEmoji: '🇸🇳'),
     Country(id: 14, name: 'Spain', flagEmoji: '🇪🇸'),

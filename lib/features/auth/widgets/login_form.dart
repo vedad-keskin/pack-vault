@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 
 class LoginForm extends StatefulWidget {
-  final Future<bool> Function(String username, String password, bool isRegister) onSubmit;
+  final Future<bool> Function(String username, String password) onSubmit;
   final bool isLoading;
   final String? error;
 
@@ -25,7 +25,6 @@ class _LoginFormState extends State<LoginForm>
   final _formKey = GlobalKey<FormState>();
   late AnimationController _shakeController;
   bool _obscurePassword = true;
-  bool _isRegisterMode = false;
 
   @override
   void initState() {
@@ -52,7 +51,6 @@ class _LoginFormState extends State<LoginForm>
     final success = await widget.onSubmit(
       _usernameController.text.trim(),
       _passwordController.text,
-      _isRegisterMode,
     );
     if (!success && mounted) {
       _shakeController.forward(from: 0);
@@ -102,17 +100,13 @@ class _LoginFormState extends State<LoginForm>
             mainAxisSize: MainAxisSize.min,
             children: [
               // Title
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: Text(
-                  _isRegisterMode ? 'CREATE ACCOUNT' : 'ENTER THE PITCH',
-                  key: ValueKey(_isRegisterMode),
-                  style: GoogleFonts.orbitron(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 3,
-                  ),
+              Text(
+                'ENTER THE PITCH',
+                style: GoogleFonts.orbitron(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 3,
                 ),
               ),
               const SizedBox(height: 8),
@@ -120,10 +114,11 @@ class _LoginFormState extends State<LoginForm>
                 width: 60,
                 height: 2,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: _isRegisterMode
-                        ? [AppColors.goalGold, AppColors.fireSecondary]
-                        : [AppColors.pitchGreen, AppColors.pitchGreenGlow],
+                  gradient: const LinearGradient(
+                    colors: [
+                      AppColors.pitchGreen,
+                      AppColors.pitchGreenGlow,
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(1),
                 ),
@@ -173,7 +168,7 @@ class _LoginFormState extends State<LoginForm>
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Enter a password';
-                  if (v.length < 6) return 'Min 6 characters';
+                  if (v.length < 4) return 'Min 4 characters';
                   return null;
                 },
                 onFieldSubmitted: (_) => _submit(),
@@ -195,79 +190,38 @@ class _LoginFormState extends State<LoginForm>
                 ),
               const SizedBox(height: 24),
 
-              // Submit button
+              // Login button
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
                   onPressed: widget.isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isRegisterMode
-                        ? AppColors.goalGold
-                        : AppColors.pitchGreen,
-                    foregroundColor: _isRegisterMode
-                        ? AppColors.pitchDark
-                        : Colors.white,
+                    backgroundColor: AppColors.pitchGreen,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                     ),
                     elevation: 8,
-                    shadowColor: (_isRegisterMode
-                            ? AppColors.goalGold
-                            : AppColors.pitchGreen)
-                        .withValues(alpha: 0.4),
+                    shadowColor: AppColors.pitchGreen.withValues(alpha: 0.4),
                   ),
                   child: widget.isLoading
-                      ? SizedBox(
+                      ? const SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            color: _isRegisterMode
-                                ? AppColors.pitchDark
-                                : Colors.white,
+                            color: Colors.white,
                           ),
                         )
                       : Text(
-                          _isRegisterMode ? 'SIGN UP' : 'KICK OFF',
+                          'KICK OFF',
                           style: GoogleFonts.orbitron(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                             letterSpacing: 2,
                           ),
                         ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Toggle login/register
-              GestureDetector(
-                onTap: () {
-                  setState(() => _isRegisterMode = !_isRegisterMode);
-                },
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: GoogleFonts.inter(
-                      color: AppColors.textMuted,
-                      fontSize: 13,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: _isRegisterMode
-                            ? 'Already have an account? '
-                            : 'Don\'t have an account? ',
-                      ),
-                      TextSpan(
-                        text: _isRegisterMode ? 'Login' : 'Register',
-                        style: GoogleFonts.inter(
-                          color: AppColors.pitchGreenGlow,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],
