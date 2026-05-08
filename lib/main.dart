@@ -6,6 +6,7 @@ import 'package:pack_vault/core/theme/app_theme.dart';
 import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/services/collection_service.dart';
 import 'package:pack_vault/data/repositories/card_repository.dart';
+import 'package:pack_vault/data/datasources/firebase_datasource.dart';
 import 'package:pack_vault/features/auth/login_screen.dart';
 import 'package:pack_vault/features/album/album_screen.dart';
 
@@ -18,6 +19,9 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     firebaseReady = true;
+
+    // Enable offline persistence for Realtime Database
+    await FirebaseDatasource.enablePersistence();
   } catch (e) {
     debugPrint('Firebase init failed: $e');
     debugPrint('Run: flutterfire configure --project=YOUR_PROJECT_ID');
@@ -48,11 +52,6 @@ class PackVaultApp extends StatelessWidget {
             ? Consumer<AuthService>(
                 builder: (context, auth, _) {
                   if (auth.isLoggedIn) {
-                    // Start listening if returning from backgrounded app
-                    final collection = context.read<CollectionService>();
-                    if (collection.isLoading) {
-                      collection.startListening(auth.uid);
-                    }
                     return const AlbumScreen();
                   }
                   return const LoginScreen();

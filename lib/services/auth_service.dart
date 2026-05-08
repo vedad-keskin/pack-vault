@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pack_vault/data/datasources/firebase_datasource.dart';
 
 /// Handles authentication using Firebase Auth with synthetic email pattern.
 /// Username "vedad" becomes "vedad@packvault.local".
+/// Persists login state locally for offline access.
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseDatasource _datasource = FirebaseDatasource();
@@ -29,10 +31,39 @@ class AuthService extends ChangeNotifier {
 
   String _toEmail(String username) => '${username.toLowerCase().trim()}@packvault.local';
 
+  /// Load username: try local first (instant), then Firebase.
   Future<void> _loadUsername() async {
     if (_user == null) return;
-    _username = await _datasource.getUsername(_user!.uid);
-    notifyListeners();
+
+    // Try local storage first (works offline)
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _username = prefs.getString('username_${_user!.uid}');
+      if (_username != null) {
+        notifyListeners();
+      }
+    } catch (_) {}
+
+    // Then try Firebase (updates if changed)
+    try {
+      final fbUsername = await _datasource.getUsername(_user!.uid);
+      if (fbUsername != null && fbUsername != _username) {
+        _username = fbUsername;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('username_${_user!.uid}', fbUsername);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Firebase username fetch failed (offline?): $e');
+    }
+  }
+
+  /// Save username locally for offline access.
+  Future<void> _saveUsernameLocal(String uid, String username) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username_$uid', username);
+    } catch (_) {}
   }
 
   /// Login an existing user.
@@ -50,6 +81,7 @@ class AuthService extends ChangeNotifier {
       );
       _user = cred.user;
       _username = username;
+      await _saveUsernameLocal(_user!.uid, username);
       _isLoading = false;
       notifyListeners();
       return true;
@@ -86,6 +118,7 @@ class AuthService extends ChangeNotifier {
       );
       _user = cred.user;
       _username = username;
+      await _saveUsernameLocal(_user!.uid, username);
 
       // Initialize user node in RTDB with all 432 cards as false
       await _datasource.initializeUserCards(_user!.uid, username);

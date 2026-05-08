@@ -28,6 +28,15 @@ class _AlbumScreenState extends State<AlbumScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
+
+    // Start listening to Firebase after the first frame (providers ready)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = context.read<AuthService>();
+      final collection = context.read<CollectionService>();
+      if (auth.isLoggedIn) {
+        collection.startListening(auth.uid);
+      }
+    });
   }
 
   @override
