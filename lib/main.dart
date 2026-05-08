@@ -1,41 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:pack_vault/firebase_options.dart';
 import 'package:pack_vault/core/theme/app_theme.dart';
 import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/services/collection_service.dart';
-import 'package:pack_vault/data/repositories/card_repository.dart';
-import 'package:pack_vault/data/datasources/firebase_datasource.dart';
+import 'package:pack_vault/features/splash/pack_vault_splash.dart';
 import 'package:pack_vault/features/auth/login_screen.dart';
 import 'package:pack_vault/features/album/album_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  bool firebaseReady = false;
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    firebaseReady = true;
-
-    // Enable offline persistence for Realtime Database
-    await FirebaseDatasource.enablePersistence();
-  } catch (e) {
-    debugPrint('Firebase init failed: $e');
-    debugPrint('Run: flutterfire configure --project=YOUR_PROJECT_ID');
-  }
-
-  // Load card database (player names from JSON)
-  await CardRepository.loadCards();
-
-  runApp(PackVaultApp(firebaseReady: firebaseReady));
+  runApp(const PackVaultApp());
 }
 
 class PackVaultApp extends StatelessWidget {
-  final bool firebaseReady;
-  const PackVaultApp({super.key, required this.firebaseReady});
+  const PackVaultApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,24 +26,41 @@ class PackVaultApp extends StatelessWidget {
         title: 'Pack Vault',
         theme: AppTheme.darkTheme,
         debugShowCheckedModeBanner: false,
-        home: firebaseReady
-            ? Consumer<AuthService>(
-                builder: (context, auth, _) {
-                  if (auth.isLoggedIn) {
-                    return const AlbumScreen();
-                  }
-                  return const LoginScreen();
-                },
-              )
-            : const _FirebaseErrorScreen(),
+        home: PackVaultSplash(
+          nextBuilder: (firebaseReady) {
+            return _HomeRouter(firebaseReady: firebaseReady);
+          },
+        ),
       ),
     );
   }
 }
 
-/// Shown when Firebase is not configured yet.
-class _FirebaseErrorScreen extends StatelessWidget {
-  const _FirebaseErrorScreen();
+/// Routes to AlbumScreen if logged in, LoginScreen if not,
+/// and shows error if Firebase isn't available and no cached session.
+class _HomeRouter extends StatelessWidget {
+  final bool firebaseReady;
+  const _HomeRouter({required this.firebaseReady});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthService>(
+      builder: (context, auth, _) {
+        if (auth.isLoggedIn) {
+          return const AlbumScreen();
+        }
+        if (!firebaseReady) {
+          return const _OfflineNoSessionScreen();
+        }
+        return const LoginScreen();
+      },
+    );
+  }
+}
+
+/// Shown when offline and no cached login session exists.
+class _OfflineNoSessionScreen extends StatelessWidget {
+  const _OfflineNoSessionScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -76,18 +71,17 @@ class _FirebaseErrorScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.cloud_off, size: 64, color: Colors.white38),
+              const Icon(Icons.wifi_off, size: 64, color: Colors.white38),
               const SizedBox(height: 24),
               Text(
-                'Firebase Not Configured',
+                'No Internet Connection',
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
-                'Run the following command to set up Firebase:\n\n'
-                'flutterfire configure --project=YOUR_PROJECT_ID\n\n'
-                'Then rebuild the app.',
+                'Connect to the internet to login for the first time.\n'
+                'After that, the app works fully offline!',
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
