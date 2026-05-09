@@ -9,6 +9,9 @@ class Country {
     required this.flagEmoji,
   });
 
+  /// Path to the national team badge PNG in assets/badges/
+  String get badgeAsset => 'assets/badges/$id.png';
+
   static const List<Country> all = [
     Country(id: 1, name: 'Mexico', flagEmoji: '🇲🇽'),
     Country(id: 2, name: 'Switzerland', flagEmoji: '🇨🇭'),

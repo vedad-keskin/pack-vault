@@ -14,7 +14,10 @@ import 'package:pack_vault/features/album/album_page_transition.dart';
 
 /// Main album screen with swipeable pages and collection tracking.
 class AlbumScreen extends StatefulWidget {
-  const AlbumScreen({super.key});
+  /// 0-indexed initial page to show (for jumping to a specific country).
+  final int initialPage;
+
+  const AlbumScreen({super.key, this.initialPage = 0});
 
   @override
   State<AlbumScreen> createState() => _AlbumScreenState();
@@ -22,21 +25,16 @@ class AlbumScreen extends StatefulWidget {
 
 class _AlbumScreenState extends State<AlbumScreen> {
   late PageController _pageController;
-  int _currentPage = 0;
+  late int _currentPage;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _currentPage = widget.initialPage;
+    _pageController = PageController(initialPage: widget.initialPage);
 
-    // Start listening to Firebase after the first frame (providers ready)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final auth = context.read<AuthService>();
-      final collection = context.read<CollectionService>();
-      if (auth.isLoggedIn) {
-        collection.startListening(auth.uid);
-      }
-    });
+    // Firebase listening is started from CountrySelectScreen.
+    // No need to start it again here — it's idempotent anyway.
   }
 
   @override
@@ -83,6 +81,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
                     totalCards: collection.totalCards,
                     username: auth.username ?? 'Player',
                     onLogout: _onLogout,
+                    onBack: () => Navigator.of(context).pop(),
                   );
                 },
               ),

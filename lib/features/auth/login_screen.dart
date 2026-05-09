@@ -3,24 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/services/auth_service.dart';
-import 'package:pack_vault/services/collection_service.dart';
 import 'package:pack_vault/features/auth/widgets/stadium_intro.dart';
 import 'package:pack_vault/features/auth/widgets/login_form.dart';
 import 'package:pack_vault/features/auth/register_screen.dart';
-import 'package:pack_vault/features/album/album_screen.dart';
+import 'package:pack_vault/features/album/country_select_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   void _navigateToAlbum(BuildContext context) {
-    final auth = context.read<AuthService>();
-    final collection = context.read<CollectionService>();
-    collection.startListening(auth.uid);
-
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 800),
-        pageBuilder: (_, a, b) => const AlbumScreen(),
+        pageBuilder: (_, a, b) => const CountrySelectScreen(),
         transitionsBuilder: (_, animation, a2, child) {
           return FadeTransition(
             opacity: CurvedAnimation(

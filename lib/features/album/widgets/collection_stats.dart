@@ -8,6 +8,7 @@ class CollectionStats extends StatelessWidget {
   final int totalCards;
   final String username;
   final VoidCallback onLogout;
+  final VoidCallback? onBack;
 
   const CollectionStats({
     super.key,
@@ -15,6 +16,7 @@ class CollectionStats extends StatelessWidget {
     required this.totalCards,
     required this.username,
     required this.onLogout,
+    this.onBack,
   });
 
   @override
@@ -37,6 +39,18 @@ class CollectionStats extends StatelessWidget {
         bottom: false,
         child: Row(
           children: [
+            // Back button (when navigating from country select)
+            if (onBack != null) ...[
+              IconButton(
+                onPressed: onBack,
+                icon: const Icon(Icons.arrow_back_ios_new,
+                    color: AppColors.textSecondary, size: 18),
+                tooltip: 'Back to countries',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+              const SizedBox(width: 4),
+            ],
             // User info
             const Icon(Icons.sports_soccer,
                 color: AppColors.pitchGreenGlow, size: 20),

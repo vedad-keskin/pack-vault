@@ -72,6 +72,13 @@ class CardRepository {
     return _cards.where((c) => c.countryId == countryId).toList();
   }
 
+  /// Returns the 0-indexed page for the PageController given a country ID.
+  /// Country 1 → pages 1-2 → index 0, Country 2 → pages 3-4 → index 2, etc.
+  static int firstPageIndexForCountry(int countryId) {
+    if (countryId == 26) return totalPages - 1; // Legends = last page
+    return (countryId - 1) * 2;
+  }
+
   /// Fallback generator if JSON can't be loaded.
   static List<StickerCard> _generateCards() {
     final List<StickerCard> cards = [];

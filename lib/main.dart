@@ -5,7 +5,7 @@ import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/services/collection_service.dart';
 import 'package:pack_vault/features/splash/pack_vault_splash.dart';
 import 'package:pack_vault/features/auth/login_screen.dart';
-import 'package:pack_vault/features/album/album_screen.dart';
+import 'package:pack_vault/features/album/country_select_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +47,7 @@ class _HomeRouter extends StatelessWidget {
     return Consumer<AuthService>(
       builder: (context, auth, _) {
         if (auth.isLoggedIn) {
-          return const AlbumScreen();
+          return const CountrySelectScreen();
         }
         if (!firebaseReady) {
           return const _OfflineNoSessionScreen();

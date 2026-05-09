@@ -38,10 +38,41 @@ class CountryHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Flag
-          Text(
-            country.flagEmoji,
-            style: const TextStyle(fontSize: 28),
+          // Badge
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.pitchDark,
+              border: Border.all(
+                color: isComplete
+                    ? AppColors.goalGold.withValues(alpha: 0.5)
+                    : AppColors.divider,
+                width: 1.5,
+              ),
+              boxShadow: [
+                if (isComplete)
+                  BoxShadow(
+                    color: AppColors.goalGoldGlow.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+              ],
+            ),
+            child: ClipOval(
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Image.asset(
+                  country.badgeAsset,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Text(
+                    country.flagEmoji,
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: 12),
 

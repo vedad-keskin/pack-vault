@@ -38,3 +38,4 @@ flutter:
   assets:
     - lib/data/cards_database.json
     - assets/logo.png
+    - assets/badges/
