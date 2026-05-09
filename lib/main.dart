@@ -23,7 +23,7 @@ class PackVaultApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CollectionService()),
       ],
       child: MaterialApp(
-        title: 'Pack Vault',
+        title: 'Stickr',
         theme: AppTheme.darkTheme,
         debugShowCheckedModeBanner: false,
         home: PackVaultSplash(

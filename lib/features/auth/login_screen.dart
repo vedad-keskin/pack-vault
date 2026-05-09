@@ -36,13 +36,13 @@ class LoginScreen extends StatelessWidget {
         pageBuilder: (_, a, b) => const RegisterScreen(),
         transitionsBuilder: (_, animation, __, child) {
           return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 1),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-            )),
+            position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                .animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ),
+                ),
             child: child,
           );
         },
@@ -89,7 +89,9 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.firePrimary.withValues(alpha: 0.15),
+                            color: AppColors.firePrimary.withValues(
+                              alpha: 0.15,
+                            ),
                             blurRadius: 30,
                             spreadRadius: 4,
                           ),
@@ -106,20 +108,11 @@ class LoginScreen extends StatelessWidget {
                           'assets/logo.png',
                           width: 130,
                           height: 130,
-                          fit: BoxFit.contain,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'Sticker Album Collection Tracker',
-                      style: GoogleFonts.inter(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 36),
 
                     // Login form (login only — no register)
                     Consumer<AuthService>(
@@ -130,13 +123,17 @@ class LoginScreen extends StatelessWidget {
                           onSubmit: (username, password) async {
                             // Admin backdoor → register screen
                             if (username == 'admin' && password == 'admin') {
+                              auth.clearError();
                               if (context.mounted) {
                                 _navigateToRegister(context);
                               }
                               return false;
                             }
 
-                            final success = await auth.login(username, password);
+                            final success = await auth.login(
+                              username,
+                              password,
+                            );
                             if (success && context.mounted) {
                               _navigateToAlbum(context);
                             }

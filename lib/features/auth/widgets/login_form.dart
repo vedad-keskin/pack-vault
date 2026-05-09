@@ -128,9 +128,19 @@ class _LoginFormState extends State<LoginForm>
               // Username field
               TextFormField(
                 controller: _usernameController,
-                style: GoogleFonts.inter(color: AppColors.textPrimary),
+                style: GoogleFonts.orbitron(
+                  color: AppColors.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
                 decoration: InputDecoration(
-                  labelText: 'Username',
+                  labelText: 'USERNAME',
+                  labelStyle: GoogleFonts.orbitron(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                    letterSpacing: 2,
+                  ),
                   prefixIcon: const Icon(Icons.person_outline,
                       color: AppColors.textMuted),
                   suffixIcon: const Icon(Icons.sports_soccer,
@@ -149,9 +159,19 @@ class _LoginFormState extends State<LoginForm>
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
-                style: GoogleFonts.inter(color: AppColors.textPrimary),
+                style: GoogleFonts.orbitron(
+                  color: AppColors.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: 'PASSWORD',
+                  labelStyle: GoogleFonts.orbitron(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                    letterSpacing: 2,
+                  ),
                   prefixIcon: const Icon(Icons.lock_outline,
                       color: AppColors.textMuted),
                   suffixIcon: IconButton(
@@ -181,9 +201,11 @@ class _LoginFormState extends State<LoginForm>
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     widget.error!,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.orbitron(
                       color: AppColors.error,
-                      fontSize: 13,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
                     ),
                     textAlign: TextAlign.center,
                   ),

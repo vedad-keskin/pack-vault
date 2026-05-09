@@ -61,10 +61,11 @@ class CollectionStats extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   username,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.orbitron(
                     color: AppColors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
                   ),
                 ),
                 const Spacer(),

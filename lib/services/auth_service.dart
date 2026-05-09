@@ -144,6 +144,13 @@ class AuthService extends ChangeNotifier {
     return false;
   }
 
+  void clearError() {
+    if (_error != null) {
+      _error = null;
+      notifyListeners();
+    }
+  }
+
   Future<void> logout() async {
     await _auth.signOut();
     _user = null;

@@ -51,13 +51,11 @@ class _PackVaultSplashState extends State<PackVaultSplash>
   Future<void> _initialize() async {
     final stopwatch = Stopwatch()..start();
 
-    // Step 1: Load card database
-    _updateStatus('Loading card database...', 0.15);
+    _updateStatus('Loading card database', 0.15);
     await CardRepository.loadCards();
     _updateStatus('Cards loaded', 0.35);
 
-    // Step 2: Try Firebase
-    _updateStatus('Connecting to Firebase...', 0.5);
+    _updateStatus('Connecting to Firebase', 0.5);
     try {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
@@ -70,16 +68,14 @@ class _PackVaultSplashState extends State<PackVaultSplash>
       _updateStatus('Offline mode', 0.9);
     }
 
-    _updateStatus(_firebaseReady ? 'Ready!' : 'Playing offline', 1.0);
+    _updateStatus('', 1.0);
 
-    // Wait for minimum splash duration
     final elapsed = stopwatch.elapsed;
     final remaining = widget.minDuration - elapsed;
     if (remaining > Duration.zero) {
       await Future.delayed(remaining);
     }
 
-    // Wait a bit more for the fade-out animation
     await Future.delayed(const Duration(milliseconds: 500));
     _goNext();
   }
@@ -136,9 +132,9 @@ class _PackVaultSplashState extends State<PackVaultSplash>
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color(0xFF040D1A),
+                      Color(0xFF020A14),
                       Color(0xFF0A1628),
-                      Color(0xFF0D1F35),
+                      Color(0xFF081220),
                     ],
                   ),
                 ),
@@ -152,17 +148,34 @@ class _PackVaultSplashState extends State<PackVaultSplash>
               ),
             ),
 
+            // === Stadium floodlight beams ===
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Builder(builder: (_) {
+                  final beamIn = _easeOut(_interval(t, 0.03, 0.25));
+                  final sweep = sin(t * pi * 3) * 0.5 + 0.5;
+                  final beamOut = t > 0.88 ? (1.0 - _interval(t, 0.88, 1.0)) : 1.0;
+                  return CustomPaint(
+                    painter: _FloodlightPainter(
+                      opacity: (beamIn * beamOut * 0.35).clamp(0.0, 0.35),
+                      sweep: sweep,
+                    ),
+                  );
+                }),
+              ),
+            ),
+
             // === Stadium glow behind logo ===
             Positioned.fill(
               child: IgnorePointer(
                 child: Builder(builder: (_) {
                   final glowIn = _easeOut(_interval(t, 0.05, 0.3));
                   final pulse = (sin(t * pi * 4) * 0.5 + 0.5);
-                  final glowAlpha = (0.15 + 0.12 * pulse) * glowIn;
+                  final glowAlpha = (0.18 + 0.14 * pulse) * glowIn;
                   final glowOut = t > 0.9 ? (1.0 - _interval(t, 0.9, 1.0)) : 1.0;
                   return CustomPaint(
                     painter: _StadiumGlowPainter(
-                      opacity: (glowAlpha * glowOut).clamp(0.0, 0.4),
+                      opacity: (glowAlpha * glowOut).clamp(0.0, 0.45),
                     ),
                   );
                 }),
@@ -177,7 +190,23 @@ class _PackVaultSplashState extends State<PackVaultSplash>
                   final lineOut = t > 0.88 ? (1.0 - _interval(t, 0.88, 1.0)) : 1.0;
                   return CustomPaint(
                     painter: _PitchLinePainter(
-                      opacity: (lineAlpha * lineOut * 0.08).clamp(0.0, 0.1),
+                      opacity: (lineAlpha * lineOut * 0.06).clamp(0.0, 0.08),
+                    ),
+                  );
+                }),
+              ),
+            ),
+
+            // === Light sweep overlay ===
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Builder(builder: (_) {
+                  final sweepPhase = (t * 2.5) % 1.0;
+                  final sweepAlpha = t > 0.1 && t < 0.85 ? 0.06 : 0.0;
+                  return CustomPaint(
+                    painter: _LightSweepPainter(
+                      phase: sweepPhase,
+                      opacity: sweepAlpha,
                     ),
                   );
                 }),
@@ -189,11 +218,11 @@ class _PackVaultSplashState extends State<PackVaultSplash>
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(0, -0.2),
-                    radius: 1.2,
+                    center: const Alignment(0, -0.15),
+                    radius: 1.1,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
+                      Colors.black.withValues(alpha: 0.75),
                     ],
                   ),
                 ),
@@ -204,24 +233,13 @@ class _PackVaultSplashState extends State<PackVaultSplash>
             SafeArea(
               child: Center(
                 child: Builder(builder: (_) {
-                  // Logo animations
-                  final logoScale = _easeOutBack(_interval(t, 0.05, 0.35));
+                  final logoScale = _easeOutBack(_interval(t, 0.05, 0.38));
                   final logoFade = _easeOut(_interval(t, 0.02, 0.2));
-
-                  // Title animations
-                  final titleFade = _easeOut(_interval(t, 0.15, 0.4));
-                  final titleSlide = 1.0 - _easeOut(_interval(t, 0.15, 0.4));
-
-                  // Subtitle
-                  final subFade = _easeOut(_interval(t, 0.25, 0.5));
-
-                  // Progress bar
-                  final barFade = _easeOut(_interval(t, 0.2, 0.4));
-
-                  // Fire shimmer on title
-                  final shimmer = sin(t * pi * 6) * 0.5 + 0.5;
-
-                  // Fade everything out at end
+                  final titleFade = _easeOut(_interval(t, 0.18, 0.42));
+                  final titleSlide = 1.0 - _easeOut(_interval(t, 0.18, 0.42));
+                  final subFade = _easeOut(_interval(t, 0.28, 0.5));
+                  final barFade = _easeOut(_interval(t, 0.22, 0.42));
+                  final shimmer = sin(t * pi * 5) * 0.5 + 0.5;
                   final fadeOut = t > 0.88
                       ? (1.0 - _easeIn(_interval(t, 0.88, 1.0)))
                       : 1.0;
@@ -235,17 +253,17 @@ class _PackVaultSplashState extends State<PackVaultSplash>
                         Opacity(
                           opacity: logoFade.clamp(0.0, 1.0),
                           child: Transform.scale(
-                            scale: (0.6 + 0.4 * logoScale).clamp(0.0, 1.15),
-                            child: _LogoFrame(shimmer: shimmer),
+                            scale: (0.5 + 0.5 * logoScale).clamp(0.0, 1.1),
+                            child: _LogoDisplay(shimmer: shimmer),
                           ),
                         ),
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 32),
 
-                        // === Title: PACK VAULT ===
+                        // === Title: STICKR ===
                         Opacity(
                           opacity: titleFade.clamp(0.0, 1.0),
                           child: Transform.translate(
-                            offset: Offset(0, titleSlide * 20),
+                            offset: Offset(0, titleSlide * 16),
                             child: _FireTitle(shimmer: shimmer),
                           ),
                         ),
@@ -255,26 +273,26 @@ class _PackVaultSplashState extends State<PackVaultSplash>
                         Opacity(
                           opacity: subFade.clamp(0.0, 1.0),
                           child: Text(
-                            'STICKER ALBUM TRACKER',
+                            'STICKERS COLLECTING',
                             style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: AppColors.textSecondary.withValues(alpha: 0.8),
-                              letterSpacing: 3,
+                              fontSize: 11,
+                              color: AppColors.textSecondary.withValues(alpha: 0.7),
+                              letterSpacing: 4,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 44),
 
-                        // === Progress bar ===
+                        // === Stadium scoreboard progress ===
                         Opacity(
                           opacity: barFade.clamp(0.0, 1.0),
-                          child: _FireProgressBar(
+                          child: _ScoreboardProgress(
                             value: _initProgress,
                             shimmer: shimmer,
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
 
                         // === Status text ===
                         Opacity(
@@ -294,36 +312,41 @@ class _PackVaultSplashState extends State<PackVaultSplash>
   }
 }
 
-// ─── Logo Frame ──────────────────────────────────────────────────────
-class _LogoFrame extends StatelessWidget {
+// ─── Logo Display ────────────────────────────────────────────────────
+class _LogoDisplay extends StatelessWidget {
   final double shimmer;
-  const _LogoFrame({required this.shimmer});
+  const _LogoDisplay({required this.shimmer});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.firePrimary.withValues(alpha: 0.15 + 0.1 * shimmer),
-            blurRadius: 40,
+            color: const Color(0xFF1E90FF).withValues(alpha: 0.15 + 0.12 * shimmer),
+            blurRadius: 50,
             spreadRadius: 8,
           ),
           BoxShadow(
-            color: AppColors.goalGold.withValues(alpha: 0.08 + 0.05 * shimmer),
-            blurRadius: 60,
-            spreadRadius: 12,
+            color: AppColors.goalGold.withValues(alpha: 0.08 + 0.06 * shimmer),
+            blurRadius: 70,
+            spreadRadius: 15,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.6),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         child: Image.asset(
           'assets/logo.png',
-          width: 160,
-          height: 160,
-          fit: BoxFit.contain,
+          width: 170,
+          height: 170,
+          fit: BoxFit.cover,
         ),
       ),
     );
@@ -337,87 +360,152 @@ class _FireTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShaderMask(
-      shaderCallback: (bounds) {
-        return LinearGradient(
-          colors: [
-            const Color(0xFFFF3D00),
-            const Color(0xFFFF6D00),
-            const Color(0xFFFFD700),
-            const Color(0xFFFF6D00),
-            const Color(0xFFFF3D00),
-          ],
-          stops: [
-            0.0,
-            (0.25 + shimmer * 0.15).clamp(0.0, 1.0),
-            0.5,
-            (0.75 - shimmer * 0.15).clamp(0.0, 1.0),
-            1.0,
-          ],
-        ).createShader(bounds);
-      },
-      child: Text(
-        'PACK VAULT',
-        style: GoogleFonts.orbitron(
-          fontSize: 30,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-          letterSpacing: 4,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Glow shadow layer
+        Transform.translate(
+          offset: Offset(shimmer * 1.5, 0),
+          child: Text(
+            'STICKR',
+            style: GoogleFonts.orbitron(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: AppColors.firePrimary.withValues(alpha: 0.3),
+              letterSpacing: 6,
+            ),
+          ),
         ),
-      ),
+        // Main title with gradient
+        ShaderMask(
+          shaderCallback: (bounds) {
+            return LinearGradient(
+              colors: const [
+                Color(0xFFFF3D00),
+                Color(0xFFFF6D00),
+                Color(0xFFFFD700),
+                Color(0xFFFF6D00),
+                Color(0xFFFF3D00),
+              ],
+              stops: [
+                0.0,
+                (0.2 + shimmer * 0.15).clamp(0.0, 1.0),
+                0.5,
+                (0.8 - shimmer * 0.15).clamp(0.0, 1.0),
+                1.0,
+              ],
+            ).createShader(bounds);
+          },
+          child: Text(
+            'STICKR',
+            style: GoogleFonts.orbitron(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: 6,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-// ─── Progress Bar ────────────────────────────────────────────────────
-class _FireProgressBar extends StatelessWidget {
+// ─── Scoreboard Progress Bar ─────────────────────────────────────────
+class _ScoreboardProgress extends StatelessWidget {
   final double value;
   final double shimmer;
-  const _FireProgressBar({required this.value, required this.shimmer});
+  const _ScoreboardProgress({required this.value, required this.shimmer});
 
   @override
   Widget build(BuildContext context) {
     final v = value.clamp(0.0, 1.0);
-    return Container(
-      width: 260,
-      height: 8,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: AppColors.surface,
-        border: Border.all(
-          color: AppColors.surfaceLight.withValues(alpha: 0.5),
-          width: 1,
+    final pct = (v * 100).toInt();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Percentage display
+        Text(
+          '$pct%',
+          style: GoogleFonts.orbitron(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: v >= 1.0
+                ? AppColors.goalGold
+                : AppColors.textSecondary,
+            letterSpacing: 2,
+          ),
         ),
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: AnimatedFractionallySizedBox(
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOut,
-          widthFactor: max(0.02, v),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.firePrimary,
-                  AppColors.fireSecondary,
-                  Color.lerp(AppColors.goalGold, AppColors.fireSecondary, shimmer)!,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.firePrimary.withValues(alpha: 0.5),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ],
+        const SizedBox(height: 10),
+        // Stadium-style segmented bar
+        SizedBox(
+          width: 280,
+          height: 6,
+          child: CustomPaint(
+            painter: _SegmentedBarPainter(
+              value: v,
+              shimmer: shimmer,
             ),
           ),
         ),
-      ),
+      ],
     );
   }
+}
+
+class _SegmentedBarPainter extends CustomPainter {
+  final double value;
+  final double shimmer;
+  _SegmentedBarPainter({required this.value, required this.shimmer});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    const segments = 30;
+    const gap = 2.0;
+    final segW = (size.width - (segments - 1) * gap) / segments;
+
+    for (int i = 0; i < segments; i++) {
+      final x = i * (segW + gap);
+      final segProgress = (i + 1) / segments;
+      final filled = segProgress <= value;
+
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(x, 0, segW, size.height),
+        const Radius.circular(1.5),
+      );
+
+      if (filled) {
+        // Fire gradient for filled segments
+        final segShimmer = (shimmer + i * 0.03) % 1.0;
+        final color = Color.lerp(
+          const Color(0xFFFF5500),
+          const Color(0xFFFFD700),
+          segShimmer,
+        )!;
+        final paint = Paint()..color = color;
+        canvas.drawRRect(rect, paint);
+
+        // Glow on last filled segment
+        if ((segProgress - value).abs() < 1.0 / segments) {
+          final glowPaint = Paint()
+            ..color = const Color(0xFFFFD700).withOpacity(0.5)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+          canvas.drawRRect(rect, glowPaint);
+        }
+      } else {
+        final paint = Paint()
+          ..color = const Color(0xFF1A2A44).withOpacity(0.8);
+        canvas.drawRRect(rect, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SegmentedBarPainter old) =>
+      old.value != value || old.shimmer != shimmer;
 }
 
 // ─── Status Text ─────────────────────────────────────────────────────
@@ -428,21 +516,78 @@ class _StatusText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dots = ((phase * 8).floor() % 4);
-    final dotStr = text.endsWith('...') || text.endsWith('!')
-        ? ''
-        : List.filled(dots, '.').join();
+    final isTerminal = text.endsWith('!') || text == 'Playing offline';
 
-    return Text(
-      '$text$dotStr',
-      style: GoogleFonts.inter(
-        fontSize: 13,
-        color: AppColors.textMuted,
-        fontWeight: FontWeight.w400,
-        letterSpacing: 0.5,
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (isTerminal)
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: Icon(
+              text == 'Ready!' ? Icons.check_circle : Icons.cloud_off,
+              color: text == 'Ready!'
+                  ? AppColors.pitchGreenGlow
+                  : AppColors.goalGoldDim,
+              size: 14,
+            ),
+          ),
+        Text(
+          text,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            color: AppColors.textMuted,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
     );
   }
+}
+
+// ─── Floodlight Painter ──────────────────────────────────────────────
+class _FloodlightPainter extends CustomPainter {
+  final double opacity;
+  final double sweep;
+  _FloodlightPainter({required this.opacity, required this.sweep});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty || opacity <= 0) return;
+
+    // Two stadium floodlight beams from top corners
+    _drawBeam(canvas, size, size.width * (0.15 + sweep * 0.1), opacity * 0.8);
+    _drawBeam(canvas, size, size.width * (0.85 - sweep * 0.1), opacity * 0.6);
+    // Center subtle beam
+    _drawBeam(canvas, size, size.width * 0.5, opacity * 0.3);
+  }
+
+  void _drawBeam(Canvas canvas, Size size, double x, double alpha) {
+    final beamPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: alpha),
+          Colors.white.withValues(alpha: alpha * 0.3),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.3, 1.0],
+      ).createShader(Rect.fromLTWH(x - 50, 0, 100, size.height * 0.6));
+
+    final path = Path()
+      ..moveTo(x - 8, 0)
+      ..lineTo(x + 8, 0)
+      ..lineTo(x + 60, size.height * 0.6)
+      ..lineTo(x - 60, size.height * 0.6)
+      ..close();
+    canvas.drawPath(path, beamPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _FloodlightPainter old) =>
+      old.opacity != opacity || old.sweep != sweep;
 }
 
 // ─── Stadium Glow Painter ────────────────────────────────────────────
@@ -457,31 +602,62 @@ class _StadiumGlowPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2 - 60);
     final r = min(size.width, size.height) * 0.25;
 
-    // Green stadium glow
     final glow = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0xFF4CAF50).withValues(alpha: opacity),
-          const Color(0xFF1B5E20).withValues(alpha: opacity * 0.4),
+          const Color(0xFFFF6D00).withValues(alpha: opacity * 0.5),
+          const Color(0xFF4CAF50).withValues(alpha: opacity * 0.3),
           Colors.transparent,
         ],
         stops: const [0.0, 0.5, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: r * 2.5));
-    canvas.drawCircle(center, r * 2.5, glow);
+      ).createShader(Rect.fromCircle(center: center, radius: r * 2.8));
+    canvas.drawCircle(center, r * 2.8, glow);
 
-    // Inner warm glow (fire/gold)
     final warm = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0xFFFF6D00).withValues(alpha: opacity * 0.3),
+          const Color(0xFFFF6D00).withValues(alpha: opacity * 0.35),
           Colors.transparent,
         ],
-      ).createShader(Rect.fromCircle(center: center, radius: r * 1.2));
-    canvas.drawCircle(center, r * 1.2, warm);
+      ).createShader(Rect.fromCircle(center: center, radius: r * 1.0));
+    canvas.drawCircle(center, r * 1.0, warm);
   }
 
   @override
   bool shouldRepaint(covariant _StadiumGlowPainter old) => old.opacity != opacity;
+}
+
+// ─── Light Sweep Painter ─────────────────────────────────────────────
+class _LightSweepPainter extends CustomPainter {
+  final double phase;
+  final double opacity;
+  _LightSweepPainter({required this.phase, required this.opacity});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty || opacity <= 0) return;
+
+    final sweepX = phase * size.width * 1.4 - size.width * 0.2;
+    const sweepW = 120.0;
+
+    final paint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          Colors.transparent,
+          Colors.white.withValues(alpha: opacity),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromLTWH(sweepX, 0, sweepW, size.height));
+
+    canvas.drawRect(
+      Rect.fromLTWH(sweepX, 0, sweepW, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _LightSweepPainter old) =>
+      old.phase != phase || old.opacity != opacity;
 }
 
 // ─── Pitch Line Painter ──────────────────────────────────────────────
@@ -501,13 +677,8 @@ class _PitchLinePainter extends CustomPainter {
     final cx = size.width / 2;
     final cy = size.height / 2;
 
-    // Center circle
     canvas.drawCircle(Offset(cx, cy), 80, paint);
-
-    // Center line
     canvas.drawLine(Offset(0, cy), Offset(size.width, cy), paint);
-
-    // Center dot
     canvas.drawCircle(
       Offset(cx, cy),
       4,
@@ -529,27 +700,31 @@ class _FootballParticlePainter extends CustomPainter {
     if (size.isEmpty) return;
 
     final rng = Random(42);
-    const count = 35;
+    const count = 40;
 
     for (int i = 0; i < count; i++) {
       final baseX = rng.nextDouble() * size.width;
       final baseY = rng.nextDouble() * size.height;
-      final speed = 0.3 + rng.nextDouble() * 0.7;
-      final particleSize = 1.5 + rng.nextDouble() * 2.5;
+      final speed = 0.2 + rng.nextDouble() * 0.6;
+      final particleSize = 1.0 + rng.nextDouble() * 2.5;
 
-      // Slow drift upward
-      final y = (baseY - time * speed * size.height * 0.15) % size.height;
-      final x = baseX + sin(time * pi * 2 + i) * 8;
+      final y = (baseY - time * speed * size.height * 0.12) % size.height;
+      final x = baseX + sin(time * pi * 2 + i * 0.7) * 10;
 
-      // Fade based on position and time
       final fadeIn = (time * 3).clamp(0.0, 1.0);
       final fadeOut = time > 0.85 ? (1.0 - (time - 0.85) / 0.15) : 1.0;
-      final alpha = (0.15 + 0.2 * rng.nextDouble()) * fadeIn * fadeOut;
+      final alpha = (0.12 + 0.18 * rng.nextDouble()) * fadeIn * fadeOut;
 
-      final isGold = i % 5 == 0;
-      final color = isGold
-          ? const Color(0xFFFFD700).withValues(alpha: alpha)
-          : const Color(0xFF4CAF50).withValues(alpha: alpha * 0.7);
+      final isGold = i % 6 == 0;
+      final isFire = i % 8 == 0;
+      final Color color;
+      if (isGold) {
+        color = const Color(0xFFFFD700).withValues(alpha: alpha);
+      } else if (isFire) {
+        color = const Color(0xFFFF6D00).withValues(alpha: alpha * 0.8);
+      } else {
+        color = const Color(0xFF4CAF50).withValues(alpha: alpha * 0.6);
+      }
 
       canvas.drawCircle(Offset(x, y), particleSize, Paint()..color = color);
     }

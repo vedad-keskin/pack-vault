@@ -115,24 +115,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      '⚡ ADMIN PANEL',
-                      style: GoogleFonts.orbitron(
-                        color: AppColors.goalGold,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Create a new user account',
-                      style: GoogleFonts.inter(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
 
                     // Register form
                     Container(
@@ -193,16 +175,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 // Username
                                 TextFormField(
                                   controller: _usernameController,
-                                  style: GoogleFonts.inter(color: AppColors.textPrimary),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Username',
-                                    prefixIcon: Icon(Icons.person_outline,
-                                        color: AppColors.textMuted),
+                                  style: GoogleFonts.orbitron(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                  ),
+                                  decoration: InputDecoration(
+                                    labelText: 'USERNAME',
+                                    labelStyle: GoogleFonts.orbitron(
+                                      color: AppColors.textMuted,
+                                      fontSize: 11,
+                                      letterSpacing: 2,
+                                    ),
+
+                                    prefixIcon: Icon(
+                                      Icons.person_outline,
+                                      color: AppColors.textMuted,
+                                    ),
                                   ),
                                   validator: (v) {
-                                    if (v == null || v.trim().isEmpty) return 'Enter a username';
-                                    if (v.trim().length < 3) return 'Min 3 characters';
-                                    if (v.trim() == 'admin') return 'Cannot use "admin"';
+                                    if (v == null || v.trim().isEmpty)
+                                      return 'Enter a username';
+                                    if (v.trim().length < 3)
+                                      return 'Min 3 characters';
+                                    if (v.trim() == 'admin')
+                                      return 'Cannot use "admin"';
                                     return null;
                                   },
                                   textInputAction: TextInputAction.next,
@@ -213,11 +211,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 TextFormField(
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
-                                  style: GoogleFonts.inter(color: AppColors.textPrimary),
+                                  style: GoogleFonts.orbitron(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                  ),
                                   decoration: InputDecoration(
-                                    labelText: 'Password',
-                                    prefixIcon: const Icon(Icons.lock_outline,
-                                        color: AppColors.textMuted),
+                                    labelText: 'PASSWORD',
+                                    labelStyle: GoogleFonts.orbitron(
+                                      color: AppColors.textMuted,
+                                      fontSize: 11,
+                                      letterSpacing: 2,
+                                    ),
+                                    prefixIcon: const Icon(
+                                      Icons.lock_outline,
+                                      color: AppColors.textMuted,
+                                    ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscurePassword
@@ -227,11 +237,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         size: 20,
                                       ),
                                       onPressed: () => setState(
-                                          () => _obscurePassword = !_obscurePassword),
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      ),
                                     ),
                                   ),
                                   validator: (v) {
-                                    if (v == null || v.isEmpty) return 'Enter a password';
+                                    if (v == null || v.isEmpty)
+                                      return 'Enter a password';
                                     if (v.length < 6) return 'Min 6 characters';
                                     return null;
                                   },
@@ -243,11 +256,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 TextFormField(
                                   controller: _confirmController,
                                   obscureText: true,
-                                  style: GoogleFonts.inter(color: AppColors.textPrimary),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Confirm Password',
-                                    prefixIcon: Icon(Icons.lock_outline,
-                                        color: AppColors.textMuted),
+                                  style: GoogleFonts.orbitron(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                  ),
+                                  decoration: InputDecoration(
+                                    labelText: 'CONFIRM PASSWORD',
+                                    labelStyle: GoogleFonts.orbitron(
+                                      color: AppColors.textMuted,
+                                      fontSize: 11,
+                                      letterSpacing: 2,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_outline,
+                                      color: AppColors.textMuted,
+                                    ),
                                   ),
                                   validator: (v) {
                                     if (v != _passwordController.text) {
@@ -265,9 +290,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     padding: const EdgeInsets.only(top: 8),
                                     child: Text(
                                       auth.error!,
-                                      style: GoogleFonts.inter(
+                                      style: GoogleFonts.orbitron(
                                         color: AppColors.error,
-                                        fontSize: 13,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.5,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -279,17 +306,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   width: double.infinity,
                                   height: 52,
                                   child: ElevatedButton(
-                                    onPressed: auth.isLoading ? null : _register,
+                                    onPressed: auth.isLoading
+                                        ? null
+                                        : _register,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.goalGold,
                                       foregroundColor: AppColors.pitchDark,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(AppSizes.radiusMd),
+                                        borderRadius: BorderRadius.circular(
+                                          AppSizes.radiusMd,
+                                        ),
                                       ),
                                       elevation: 8,
-                                      shadowColor:
-                                          AppColors.goalGold.withValues(alpha: 0.4),
+                                      shadowColor: AppColors.goalGold
+                                          .withValues(alpha: 0.4),
                                     ),
                                     child: auth.isLoading
                                         ? const SizedBox(
@@ -321,13 +351,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     // Back button
                     TextButton.icon(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppColors.textMuted, size: 18),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.textMuted,
+                        size: 18,
+                      ),
                       label: Text(
-                        'Back to Login',
-                        style: GoogleFonts.inter(
-                          color: AppColors.textMuted,
-                          fontSize: 13,
+                        'BACK TO LOGIN',
+                        style: GoogleFonts.orbitron(
+                          color: AppColors.textPrimary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 3,
                         ),
                       ),
                     ),
