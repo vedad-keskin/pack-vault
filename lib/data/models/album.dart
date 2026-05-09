@@ -12,9 +12,8 @@ class Album {
   });
 
   /// Cover image path for album selection grid.
-  String get coverAsset => 'assets/albums/$id/cover.png';
+  String get coverAsset => 'assets/albums/$id.png';
 
-  /// Badge image path for a category within this album.
-  String badgeAsset(int categoryId) =>
-      'assets/albums/$id/badges/$categoryId.png';
+  /// Badge image path for a category. Badges are shared across albums.
+  String badgeAsset(int categoryId) => 'assets/badges/$categoryId.png';
 }
