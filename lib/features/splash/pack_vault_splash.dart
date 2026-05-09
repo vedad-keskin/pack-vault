@@ -7,6 +7,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:pack_vault/firebase_options.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/data/datasources/firebase_datasource.dart';
+import 'package:pack_vault/data/repositories/album_repository.dart';
+import 'package:pack_vault/data/repositories/sticker_repository.dart';
+import 'package:pack_vault/services/collection_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 /// Premium football-themed splash screen.
 /// Animates the logo while initializing Firebase + loading card data.
@@ -50,15 +55,34 @@ class _PackVaultSplashState extends State<PackVaultSplash>
   Future<void> _initialize() async {
     final stopwatch = Stopwatch()..start();
 
-    _updateStatus('Initializing', 0.2);
+    _updateStatus('Initializing', 0.15);
 
-    _updateStatus('Connecting to Firebase', 0.5);
+    // Load all album data from bundled JSON assets
+    _updateStatus('Loading albums', 0.3);
+    for (final album in AlbumRepository.albums) {
+      await StickerRepository.loadAlbum(album);
+    }
+
+    _updateStatus('Connecting to Firebase', 0.55);
     try {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
       await FirebaseDatasource.enablePersistence();
       _firebaseReady = true;
+
+      // Pre-load cached collection data so album screen never shows 0%
+      _updateStatus('Loading collection', 0.8);
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && StickerRepository.isLoaded) {
+        final collection = context.read<CollectionService>();
+        await collection.preloadFromCache(
+          user.uid,
+          StickerRepository.activeAlbum!.id,
+          StickerRepository.totalStickers,
+        );
+      }
+
       _updateStatus('Connected!', 0.9);
     } catch (e) {
       debugPrint('Firebase init failed: $e');

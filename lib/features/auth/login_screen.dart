@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/services/auth_service.dart';

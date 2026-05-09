@@ -67,41 +67,69 @@ class CollectionService extends ChangeNotifier {
     }
   }
 
+  /// Pre-load cached collection data (call from splash before UI renders).
+  /// This sets the initial state so AlbumSelectScreen never shows 0%.
+  Future<void> preloadFromCache(
+      String uid, String albumId, int totalStickers) async {
+    _uid = uid;
+    _activeAlbumId = albumId;
+    _totalStickers = totalStickers;
+    await _loadFromLocal(uid, albumId);
+  }
+
   /// Start listening to sticker collection changes for the given album.
   void startListening(String uid, String albumId, int totalStickers) {
-    if (_uid == uid && _activeAlbumId == albumId && !_isLoading) return;
+    // Already fully subscribed to this album
+    if (_uid == uid && _activeAlbumId == albumId && _subscription != null) {
+      return;
+    }
+
+    // Check if cache was pre-loaded (same uid+album, has data, not loading)
+    final wasPreloaded =
+        _uid == uid && _activeAlbumId == albumId && !_isLoading;
 
     _uid = uid;
     _activeAlbumId = albumId;
     _totalStickers = totalStickers;
     _albumInitialized = false;
-    _isLoading = true;
-    notifyListeners();
 
-    // Step 1: Migrate legacy data if needed (one-time)
-    _migrateIfNeeded(uid, albumId).then((_) {
-      // Step 2: Load from local cache for instant UI
-      _loadFromLocal(uid, albumId).then((_) {
-        // Step 3: Subscribe to Firebase — source of truth
-        _subscription?.cancel();
-        _subscription = _datasource.watchAlbumStickers(uid, albumId).listen(
-          (firebaseStickers) {
-            if (firebaseStickers.isNotEmpty) {
-              _stickers = firebaseStickers;
-              _albumInitialized = true;
-              _saveToLocal();
-            }
-            _isLoading = false;
-            notifyListeners();
-          },
-          onError: (e) {
-            debugPrint('Collection stream error: $e');
-            _isLoading = false;
-            notifyListeners();
-          },
-        );
+    if (!wasPreloaded) {
+      // Fresh start — show loading, read cache
+      _isLoading = true;
+      notifyListeners();
+
+      _migrateIfNeeded(uid, albumId).then((_) {
+        _loadFromLocal(uid, albumId).then((_) {
+          _subscribeToFirebase(uid, albumId);
+        });
       });
-    });
+    } else {
+      // Cache was pre-loaded — skip loading state, just subscribe to Firebase
+      _migrateIfNeeded(uid, albumId).then((_) {
+        _subscribeToFirebase(uid, albumId);
+      });
+    }
+  }
+
+  /// Subscribe to Firebase real-time updates for an album.
+  void _subscribeToFirebase(String uid, String albumId) {
+    _subscription?.cancel();
+    _subscription = _datasource.watchAlbumStickers(uid, albumId).listen(
+      (firebaseStickers) {
+        if (firebaseStickers.isNotEmpty) {
+          _stickers = firebaseStickers;
+          _albumInitialized = true;
+          _saveToLocal();
+        }
+        _isLoading = false;
+        notifyListeners();
+      },
+      onError: (e) {
+        debugPrint('Collection stream error: $e');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 
   /// Migrate old users/$uid/cards data to users/$uid/albums/wc2026.

@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/services/auth_service.dart';
-import 'package:pack_vault/services/collection_service.dart';
 import 'package:pack_vault/features/albums/album_select_screen.dart';
 
 /// Hidden register screen, only accessible via admin/admin on login.

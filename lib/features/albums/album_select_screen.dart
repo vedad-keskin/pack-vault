@@ -12,9 +12,38 @@ import 'package:pack_vault/services/collection_service.dart';
 import 'package:pack_vault/features/auth/login_screen.dart';
 import 'package:pack_vault/features/categories/category_select_screen.dart';
 
-/// Grid of available sticker albums.
-class AlbumSelectScreen extends StatelessWidget {
+/// Album selection screen — one album per row, horizontal card layout.
+class AlbumSelectScreen extends StatefulWidget {
   const AlbumSelectScreen({super.key});
+
+  @override
+  State<AlbumSelectScreen> createState() => _AlbumSelectScreenState();
+}
+
+class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Eagerly load album data + start listening so progress shows immediately
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startCollectionListening());
+  }
+
+  void _startCollectionListening() {
+    final auth = context.read<AuthService>();
+    if (!auth.isLoggedIn) return;
+
+    // Album data is pre-loaded in splash — just start listening for progress
+    final albums = AlbumRepository.albums;
+    if (albums.isNotEmpty) {
+      final album = albums.first;
+      final collection = context.read<CollectionService>();
+      collection.startListening(
+        auth.uid,
+        album.id,
+        StickerRepository.totalStickers,
+      );
+    }
+  }
 
   void _onLogout(BuildContext context) {
     final auth = context.read<AuthService>();
@@ -34,12 +63,9 @@ class AlbumSelectScreen extends StatelessWidget {
     );
   }
 
-  void _openAlbum(BuildContext context, Album album) async {
-    // Load album data
-    await StickerRepository.loadAlbum(album);
-
-    if (context.mounted) {
-      Navigator.of(context).push(
+  void _openAlbum(BuildContext context, Album album) {
+    // Album data already pre-loaded in splash
+    Navigator.of(context).push(
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 400),
           reverseTransitionDuration: const Duration(milliseconds: 350),
@@ -61,14 +87,14 @@ class AlbumSelectScreen extends StatelessWidget {
             );
           },
         ),
-      );
-    }
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
     final albums = AlbumRepository.albums;
+    final collection = context.watch<CollectionService>();
 
     return Scaffold(
       body: Stack(
@@ -104,7 +130,7 @@ class AlbumSelectScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 // Title
                 Text(
@@ -127,28 +153,31 @@ class AlbumSelectScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(1),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
-                // Album grid
+                // Album list
                 Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                     physics: const BouncingScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: albums.length,
-                    itemBuilder: (context, index) {
-                      final album = albums[index];
-                      return _AlbumCard(
-                        album: album,
-                        onTap: () => _openAlbum(context, album),
-                      );
-                    },
+                    children: [
+                      for (final album in albums)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: _AlbumRow(
+                            album: album,
+                            collected: collection.activeAlbumId == album.id
+                                ? collection.collectedCount
+                                : 0,
+                            total: collection.activeAlbumId == album.id
+                                ? collection.totalStickers
+                                : 432,
+                            onTap: () => _openAlbum(context, album),
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+                      const _ComingSoonSection(),
+                    ],
                   ),
                 ),
               ],
@@ -160,37 +189,43 @@ class AlbumSelectScreen extends StatelessWidget {
   }
 }
 
-/// A single album card in the grid.
-class _AlbumCard extends StatefulWidget {
+// ═══════════════════════════════════════════════════════════════
+//  Horizontal album card: cover left | info right
+// ═══════════════════════════════════════════════════════════════
+
+class _AlbumRow extends StatefulWidget {
   final Album album;
+  final int collected;
+  final int total;
   final VoidCallback onTap;
 
-  const _AlbumCard({required this.album, required this.onTap});
+  const _AlbumRow({
+    required this.album,
+    required this.collected,
+    required this.total,
+    required this.onTap,
+  });
 
   @override
-  State<_AlbumCard> createState() => _AlbumCardState();
+  State<_AlbumRow> createState() => _AlbumRowState();
 }
 
-class _AlbumCardState extends State<_AlbumCard>
+class _AlbumRowState extends State<_AlbumRow>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+  late Animation<double> _scaleAnim;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 250),
-    );
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.95), weight: 40),
-      TweenSequenceItem(tween: Tween(begin: 0.95, end: 1.03), weight: 35),
-      TweenSequenceItem(tween: Tween(begin: 1.03, end: 1.0), weight: 25),
-    ]).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+        vsync: this, duration: const Duration(milliseconds: 220));
+    _scaleAnim = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.97), weight: 45),
+      TweenSequenceItem(tween: Tween(begin: 0.97, end: 1.01), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 1.01, end: 1.0), weight: 25),
+    ]).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -199,84 +234,274 @@ class _AlbumCardState extends State<_AlbumCard>
     super.dispose();
   }
 
-  void _handleTap() {
-    _controller.forward(from: 0);
-    widget.onTap();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final progress =
+        widget.total > 0 ? widget.collected / widget.total : 0.0;
+    final pct = (progress * 100).toStringAsFixed(1);
+    final isComplete = progress >= 1.0;
+
     return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        );
-      },
+      animation: _scaleAnim,
+      builder: (_, child) =>
+          Transform.scale(scale: _scaleAnim.value, child: child),
       child: GestureDetector(
-        onTap: _handleTap,
+        onTap: () {
+          _controller.forward(from: 0);
+          widget.onTap();
+        },
         child: Container(
+          height: 130,
           decoration: BoxDecoration(
-            color: AppColors.surface.withValues(alpha: 0.7),
+            color: AppColors.surface.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),
             border: Border.all(
-              color: AppColors.cardBorderUncollected,
-              width: 1,
+              color: isComplete
+                  ? AppColors.goalGold.withValues(alpha: 0.4)
+                  : AppColors.cardBorderUncollected,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 8,
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
+              if (isComplete)
+                BoxShadow(
+                  color: AppColors.goalGoldGlow.withValues(alpha: 0.2),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Row(
             children: [
-              // Album cover
-              Expanded(
-                flex: 3,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(AppSizes.radiusLg)),
+              // ── Left: cover image ──
+              ClipRRect(
+                borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(AppSizes.radiusLg)),
+                child: SizedBox(
+                  width: 110,
+                  height: 130,
                   child: Image.asset(
                     widget.album.coverAsset,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
                       color: AppColors.pitchDark,
                       child: const Icon(Icons.collections_bookmark,
-                          color: AppColors.textMuted, size: 48),
+                          color: AppColors.textMuted, size: 36),
                     ),
                   ),
                 ),
               ),
-              // Album name
+
+              // ── Right: info ──
               Expanded(
-                flex: 1,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  child: Center(
-                    child: Text(
-                      widget.album.name.toUpperCase(),
-                      style: GoogleFonts.orbitron(
-                        color: AppColors.textPrimary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Album name
+                      Text(
+                        widget.album.name.toUpperCase(),
+                        style: GoogleFonts.orbitron(
+                          color: AppColors.textPrimary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const SizedBox(height: 8),
+
+                      // Stats row
+                      Row(
+                        children: [
+                          _StatLabel(
+                            icon: Icons.style,
+                            text: '432',
+                            color: AppColors.pitchGreenGlow,
+                          ),
+                          const SizedBox(width: 14),
+                          _StatLabel(
+                            icon: Icons.flag,
+                            text: '26',
+                            color: AppColors.goalGold,
+                          ),
+                          const SizedBox(width: 14),
+                          _StatLabel(
+                            icon: Icons.auto_stories,
+                            text: '51',
+                            color: AppColors.fireSecondary,
+                          ),
+                        ],
+                      ),
+
+                      const Spacer(),
+
+                      // Progress bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor: AppColors.cardBorderUncollected,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isComplete
+                                ? AppColors.goalGold
+                                : AppColors.pitchGreenGlow,
+                          ),
+                          minHeight: 5,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Progress text
+                      Row(
+                        children: [
+                          Text(
+                            '${widget.collected}/${widget.total}',
+                            style: GoogleFonts.orbitron(
+                              color: isComplete
+                                  ? AppColors.goalGold
+                                  : AppColors.textSecondary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '$pct%',
+                            style: GoogleFonts.orbitron(
+                              color: isComplete
+                                  ? AppColors.goalGold
+                                  : AppColors.textMuted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
+                ),
+              ),
+
+              // Arrow
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textMuted.withValues(alpha: 0.6),
+                  size: 22,
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Compact stat label: icon + number.
+class _StatLabel extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  const _StatLabel({
+    required this.icon,
+    required this.text,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 14),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: GoogleFonts.orbitron(
+            color: color,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  "More Albums Coming Soon" footer
+// ═══════════════════════════════════════════════════════════════
+
+class _ComingSoonSection extends StatelessWidget {
+  const _ComingSoonSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(3, (i) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Container(
+                  width: 48,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: AppColors.pitchDark.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                    border: Border.all(
+                      color: AppColors.textMuted.withValues(alpha: 0.15),
+                    ),
+                  ),
+                  child: Icon(
+                    i == 0
+                        ? Icons.emoji_events
+                        : i == 1
+                            ? Icons.stadium
+                            : Icons.sports_soccer,
+                    color: AppColors.textMuted.withValues(alpha: 0.25),
+                    size: 22,
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'MORE ALBUMS COMING SOON',
+            style: GoogleFonts.orbitron(
+              color: AppColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Champions League, Euro, and more',
+            style: GoogleFonts.inter(
+              color: AppColors.textMuted.withValues(alpha: 0.6),
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }
