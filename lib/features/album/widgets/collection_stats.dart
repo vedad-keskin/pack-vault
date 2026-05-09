@@ -37,73 +37,71 @@ class CollectionStats extends StatelessWidget {
       ),
       child: SafeArea(
         bottom: false,
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Back button (when navigating from country select)
-            if (onBack != null) ...[
-              IconButton(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back_ios_new,
-                    color: AppColors.textSecondary, size: 18),
-                tooltip: 'Back to countries',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              ),
-              const SizedBox(width: 4),
-            ],
-            // User info
-            const Icon(Icons.sports_soccer,
-                color: AppColors.pitchGreenGlow, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              username,
-              style: GoogleFonts.outfit(
-                color: AppColors.textPrimary,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Progress bar
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: AppColors.cardBorderUncollected,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        progress >= 1.0
-                            ? AppColors.goalGold
-                            : AppColors.pitchGreenGlow,
-                      ),
-                      minHeight: 6,
-                    ),
+            // Row 1: Back button + Username + Logout
+            Row(
+              children: [
+                // Back button (when navigating from country select)
+                if (onBack != null) ...[
+                  IconButton(
+                    onPressed: onBack,
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: AppColors.textSecondary, size: 18),
+                    tooltip: 'Back to countries',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '$collectedCount/$totalCards ($pct%)',
-                    style: GoogleFonts.orbitron(
-                      color: AppColors.textMuted,
-                      fontSize: 10,
-                    ),
-                  ),
+                  const SizedBox(width: 4),
                 ],
+                // User info
+                const Icon(Icons.sports_soccer,
+                    color: AppColors.pitchGreenGlow, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  username,
+                  style: GoogleFonts.outfit(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                // Logout
+                IconButton(
+                  onPressed: onLogout,
+                  icon: const Icon(Icons.logout,
+                      color: AppColors.textMuted, size: 20),
+                  tooltip: 'Logout',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+
+            // Row 2: Full-width progress bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: AppColors.cardBorderUncollected,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  progress >= 1.0
+                      ? AppColors.goalGold
+                      : AppColors.pitchGreenGlow,
+                ),
+                minHeight: 6,
               ),
             ),
-            const SizedBox(width: 8),
-
-            // Logout
-            IconButton(
-              onPressed: onLogout,
-              icon: const Icon(Icons.logout,
-                  color: AppColors.textMuted, size: 20),
-              tooltip: 'Logout',
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            const SizedBox(height: 4),
+            Text(
+              '$collectedCount/$totalCards ($pct%)',
+              style: GoogleFonts.orbitron(
+                color: AppColors.textMuted,
+                fontSize: 10,
+              ),
             ),
           ],
         ),
@@ -111,3 +109,4 @@ class CollectionStats extends StatelessWidget {
     );
   }
 }
+

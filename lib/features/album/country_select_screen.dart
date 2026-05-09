@@ -105,26 +105,6 @@ class _CountrySelectScreenState extends State<CountrySelectScreen> {
                 },
               ),
 
-              // Title
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-                child: Row(
-                  children: [
-                    const Icon(Icons.shield_outlined,
-                        color: AppColors.pitchGreenGlow, size: 22),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Select Country',
-                      style: GoogleFonts.outfit(
-                        color: AppColors.textPrimary,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               // Country grid
               Expanded(
                 child: Consumer<CollectionService>(
@@ -376,28 +356,6 @@ class _CountryCardState extends State<_CountryCard>
                   ],
                 ),
               ),
-
-              // Completion star badge — top right corner
-              if (isComplete)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.goalGold.withValues(alpha: 0.2),
-                      border: Border.all(
-                        color: AppColors.goalGold.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.star,
-                      color: AppColors.goalGold,
-                      size: 14,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
