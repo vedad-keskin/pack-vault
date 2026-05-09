@@ -36,6 +36,7 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
   assets:
-    - lib/data/cards_database.json
+    - lib/data/albums/wc2026.json
     - assets/logo.png
-    - assets/badges/
+    - assets/albums/wc2026/cover.png
+    - assets/albums/wc2026/badges/

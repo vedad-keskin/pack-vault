@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
-import 'package:pack_vault/data/models/sticker_card.dart';
+import 'package:pack_vault/data/models/sticker.dart';
 
-/// Individual sticker card tile with collected/uncollected visual states.
+/// Individual sticker tile with collected/uncollected visual states.
 /// Tap to toggle. Shows bounce + golden glow when collected.
-class StickerCardTile extends StatefulWidget {
-  final StickerCard card;
+class StickerTile extends StatefulWidget {
+  final Sticker sticker;
   final bool isCollected;
   final VoidCallback onToggle;
   final bool isBig;
 
-  const StickerCardTile({
+  const StickerTile({
     super.key,
-    required this.card,
+    required this.sticker,
     required this.isCollected,
     required this.onToggle,
     this.isBig = false,
   });
 
   @override
-  State<StickerCardTile> createState() => _StickerCardTileState();
+  State<StickerTile> createState() => _StickerTileState();
 }
 
-class _StickerCardTileState extends State<StickerCardTile>
+class _StickerTileState extends State<StickerTile>
     with SingleTickerProviderStateMixin {
   late AnimationController _bounceController;
   late Animation<double> _scaleAnimation;
@@ -61,7 +61,6 @@ class _StickerCardTileState extends State<StickerCardTile>
     final collected = widget.isCollected;
     final big = widget.isBig;
 
-    // Scale sizes based on big/regular
     final numberSize = big ? 22.0 : 17.0;
     final nameSize = big ? 13.0 : 11.0;
     final iconSize = big ? 28.0 : 24.0;
@@ -80,7 +79,9 @@ class _StickerCardTileState extends State<StickerCardTile>
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            color: collected ? AppColors.cardCollected : AppColors.cardUncollected,
+            color: collected
+                ? AppColors.cardCollected
+                : AppColors.cardUncollected,
             borderRadius: BorderRadius.circular(AppSizes.radiusSm),
             border: Border.all(
               color: collected
@@ -91,7 +92,8 @@ class _StickerCardTileState extends State<StickerCardTile>
             boxShadow: collected
                 ? [
                     BoxShadow(
-                      color: AppColors.pitchGreenGlow.withValues(alpha: 0.25),
+                      color:
+                          AppColors.pitchGreenGlow.withValues(alpha: 0.25),
                       blurRadius: 12,
                       spreadRadius: 1,
                     ),
@@ -106,12 +108,12 @@ class _StickerCardTileState extends State<StickerCardTile>
           ),
           child: Stack(
             children: [
-              // Collected shimmer overlay
               if (collected)
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                      borderRadius:
+                          BorderRadius.circular(AppSizes.radiusSm),
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -124,17 +126,14 @@ class _StickerCardTileState extends State<StickerCardTile>
                     ),
                   ),
                 ),
-
-              // Card content
               Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: big ? 8 : 4),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Card number
                       Text(
-                        '#${widget.card.id}',
+                        '#${widget.sticker.id}',
                         style: GoogleFonts.orbitron(
                           color: collected
                               ? AppColors.goalGold
@@ -144,23 +143,22 @@ class _StickerCardTileState extends State<StickerCardTile>
                         ),
                       ),
                       SizedBox(height: big ? 8 : 4),
-                      // Player name or placeholder
-                      if (widget.card.fullName.isNotEmpty)
+                      if (widget.sticker.name.isNotEmpty)
                         Text(
-                          widget.card.fullName,
+                          widget.sticker.name,
                           style: GoogleFonts.inter(
                             color: collected
                                 ? AppColors.textPrimary
                                 : AppColors.textMuted,
                             fontSize: nameSize,
-                            fontWeight: big ? FontWeight.w500 : FontWeight.normal,
+                            fontWeight:
+                                big ? FontWeight.w500 : FontWeight.normal,
                           ),
                           textAlign: TextAlign.center,
                           maxLines: big ? 3 : 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       SizedBox(height: big ? 10 : 6),
-                      // Collected indicator
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 250),
                         child: collected
@@ -173,7 +171,8 @@ class _StickerCardTileState extends State<StickerCardTile>
                             : Icon(
                                 Icons.radio_button_unchecked,
                                 key: const ValueKey('uncollected'),
-                                color: AppColors.textMuted.withValues(alpha: 0.5),
+                                color: AppColors.textMuted
+                                    .withValues(alpha: 0.5),
                                 size: iconSize,
                               ),
                       ),

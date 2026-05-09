@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
-import 'package:pack_vault/data/models/country.dart';
 
-/// Displays country name, flag, and collection progress at the top of each album page.
-class CountryHeader extends StatelessWidget {
-  final Country country;
+/// Displays category name, badge, and collection progress at the top of each sticker page.
+class CategoryHeader extends StatelessWidget {
+  final String name;
+  final String badgeAsset;
   final int collectedCount;
   final int totalCount;
   final int pageNumber;
   final int totalPages;
 
-  const CountryHeader({
+  const CategoryHeader({
     super.key,
-    required this.country,
+    required this.name,
+    required this.badgeAsset,
     required this.collectedCount,
     required this.totalCount,
     required this.pageNumber,
@@ -64,11 +65,12 @@ class CountryHeader extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: Image.asset(
-                  country.badgeAsset,
+                  badgeAsset,
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Text(
-                    country.flagEmoji,
-                    style: const TextStyle(fontSize: 22),
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.category,
+                    color: AppColors.textMuted,
+                    size: 22,
                   ),
                 ),
               ),
@@ -76,13 +78,13 @@ class CountryHeader extends StatelessWidget {
           ),
           const SizedBox(width: 12),
 
-          // Country name & page
+          // Name & page
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  country.name,
+                  name,
                   style: GoogleFonts.outfit(
                     color: AppColors.textPrimary,
                     fontSize: 18,
@@ -121,12 +123,15 @@ class CountryHeader extends StatelessWidget {
                 if (isComplete)
                   const Padding(
                     padding: EdgeInsets.only(right: 4),
-                    child: Icon(Icons.star, color: AppColors.goalGold, size: 14),
+                    child:
+                        Icon(Icons.star, color: AppColors.goalGold, size: 14),
                   ),
                 Text(
                   '$collectedCount/$totalCount',
                   style: GoogleFonts.orbitron(
-                    color: isComplete ? AppColors.goalGold : AppColors.textSecondary,
+                    color: isComplete
+                        ? AppColors.goalGold
+                        : AppColors.textSecondary,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),

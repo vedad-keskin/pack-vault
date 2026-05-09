@@ -6,7 +6,7 @@ import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/features/auth/widgets/stadium_intro.dart';
 import 'package:pack_vault/features/auth/widgets/login_form.dart';
 import 'package:pack_vault/features/auth/register_screen.dart';
-import 'package:pack_vault/features/album/country_select_screen.dart';
+import 'package:pack_vault/features/albums/album_select_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -15,7 +15,7 @@ class LoginScreen extends StatelessWidget {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 800),
-        pageBuilder: (_, a, b) => const CountrySelectScreen(),
+        pageBuilder: (_, a, b) => const AlbumSelectScreen(),
         transitionsBuilder: (_, animation, a2, child) {
           return FadeTransition(
             opacity: CurvedAnimation(

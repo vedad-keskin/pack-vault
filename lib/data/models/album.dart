@@ -1,0 +1,20 @@
+/// A sticker album definition.
+/// Albums are registered statically in AlbumRepository.
+class Album {
+  final String id;
+  final String name;
+  final String dataAsset;
+
+  const Album({
+    required this.id,
+    required this.name,
+    required this.dataAsset,
+  });
+
+  /// Cover image path for album selection grid.
+  String get coverAsset => 'assets/albums/$id/cover.png';
+
+  /// Badge image path for a category within this album.
+  String badgeAsset(int categoryId) =>
+      'assets/albums/$id/badges/$categoryId.png';
+}

@@ -5,7 +5,7 @@ import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/services/collection_service.dart';
 import 'package:pack_vault/features/splash/pack_vault_splash.dart';
 import 'package:pack_vault/features/auth/login_screen.dart';
-import 'package:pack_vault/features/album/country_select_screen.dart';
+import 'package:pack_vault/features/albums/album_select_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,8 +36,7 @@ class PackVaultApp extends StatelessWidget {
   }
 }
 
-/// Routes to AlbumScreen if logged in, LoginScreen if not,
-/// and shows error if Firebase isn't available and no cached session.
+/// Routes to AlbumSelectScreen if logged in, LoginScreen if not.
 class _HomeRouter extends StatelessWidget {
   final bool firebaseReady;
   const _HomeRouter({required this.firebaseReady});
@@ -47,7 +46,7 @@ class _HomeRouter extends StatelessWidget {
     return Consumer<AuthService>(
       builder: (context, auth, _) {
         if (auth.isLoggedIn) {
-          return const CountrySelectScreen();
+          return const AlbumSelectScreen();
         }
         if (!firebaseReady) {
           return const _OfflineNoSessionScreen();

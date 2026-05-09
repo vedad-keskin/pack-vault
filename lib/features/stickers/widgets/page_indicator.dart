@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 
-/// Dot-style page indicator for the album PageView.
+/// Dot-style page indicator for the sticker PageView.
 class PageIndicator extends StatelessWidget {
   final int currentPage;
   final int totalPages;
@@ -15,7 +15,6 @@ class PageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Show a compact version with page number + mini dots for nearby pages
     const visibleRange = 4;
     final start = (currentPage - visibleRange).clamp(0, totalPages - 1);
     final end = (currentPage + visibleRange + 1).clamp(0, totalPages);
@@ -30,7 +29,6 @@ class PageIndicator extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Left arrow hint
           Icon(
             Icons.chevron_left,
             color: currentPage > 0
@@ -40,7 +38,6 @@ class PageIndicator extends StatelessWidget {
           ),
           const SizedBox(width: 4),
 
-          // Dots
           if (start > 0) ...[
             _dot(false),
             const SizedBox(width: 3),
@@ -56,7 +53,6 @@ class PageIndicator extends StatelessWidget {
 
           const SizedBox(width: 8),
 
-          // Page number text
           Text(
             '${currentPage + 1} / $totalPages',
             style: GoogleFonts.orbitron(
@@ -85,7 +81,9 @@ class PageIndicator extends StatelessWidget {
       width: active ? 12 : 6,
       height: 6,
       decoration: BoxDecoration(
-        color: active ? AppColors.pitchGreenGlow : AppColors.cardBorderUncollected,
+        color: active
+            ? AppColors.pitchGreenGlow
+            : AppColors.cardBorderUncollected,
         borderRadius: BorderRadius.circular(3),
         boxShadow: active
             ? [

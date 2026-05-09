@@ -5,61 +5,49 @@ import 'package:provider/provider.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/core/widgets/football_background.dart';
 import 'package:pack_vault/core/widgets/loading_indicator.dart';
-import 'package:pack_vault/data/models/country.dart';
-import 'package:pack_vault/data/repositories/card_repository.dart';
+import 'package:pack_vault/data/models/album.dart';
+import 'package:pack_vault/data/repositories/sticker_repository.dart';
 import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/services/collection_service.dart';
-import 'package:pack_vault/features/auth/login_screen.dart';
-import 'package:pack_vault/features/album/album_screen.dart';
-import 'package:pack_vault/features/album/widgets/collection_stats.dart';
+import 'package:pack_vault/features/stickers/sticker_page_screen.dart';
+import 'package:pack_vault/features/stickers/widgets/collection_stats.dart';
 
-/// Grid screen showing all 26 countries as tappable cards.
-/// Navigating to a country opens the album at that country's first page.
-class CountrySelectScreen extends StatefulWidget {
-  const CountrySelectScreen({super.key});
+/// Grid showing all categories for the selected album.
+class CategorySelectScreen extends StatefulWidget {
+  final Album album;
+  const CategorySelectScreen({super.key, required this.album});
 
   @override
-  State<CountrySelectScreen> createState() => _CountrySelectScreenState();
+  State<CategorySelectScreen> createState() => _CategorySelectScreenState();
 }
 
-class _CountrySelectScreenState extends State<CountrySelectScreen> {
+class _CategorySelectScreenState extends State<CategorySelectScreen> {
   @override
   void initState() {
     super.initState();
-    // Start Firebase listener here — the first screen after login.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthService>();
       final collection = context.read<CollectionService>();
       if (auth.isLoggedIn) {
-        collection.startListening(auth.uid);
+        collection.startListening(
+          auth.uid,
+          widget.album.id,
+          StickerRepository.totalStickers,
+        );
       }
     });
   }
 
-  void _onLogout() {
-    final auth = context.read<AuthService>();
-    final collection = context.read<CollectionService>();
-    collection.stopListening();
-    auth.logout();
-
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 600),
-        pageBuilder: (_, a, b) => const LoginScreen(),
-        transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
-  }
-
-  void _navigateToCountry(int countryId) {
-    final pageIndex = CardRepository.firstPageIndexForCountry(countryId);
+  void _navigateToCategory(int categoryId) {
+    final pageIndex = StickerRepository.firstPageIndexForCategory(categoryId);
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 400),
         reverseTransitionDuration: const Duration(milliseconds: 350),
-        pageBuilder: (_, __, ___) => AlbumScreen(initialPage: pageIndex),
+        pageBuilder: (_, __, ___) => StickerPageScreen(
+          album: widget.album,
+          initialPage: pageIndex,
+        ),
         transitionsBuilder: (_, animation, __, child) {
           final curved = CurvedAnimation(
             parent: animation,
@@ -83,29 +71,25 @@ class _CountrySelectScreenState extends State<CountrySelectScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
+    final categories = StickerRepository.categories;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Animated background
           const Positioned.fill(child: FootballBackground()),
-
-          // Main content
           Column(
             children: [
-              // Top stats bar (same as album for consistency)
               Consumer<CollectionService>(
                 builder: (context, collection, _) {
                   return CollectionStats(
                     collectedCount: collection.collectedCount,
-                    totalCards: collection.totalCards,
+                    totalStickers: collection.totalStickers,
                     username: auth.username ?? 'Player',
-                    onLogout: _onLogout,
+                    onLogout: null,
+                    onBack: () => Navigator.of(context).pop(),
                   );
                 },
               ),
-
-              // Country grid
               Expanded(
                 child: Consumer<CollectionService>(
                   builder: (context, collection, _) {
@@ -124,20 +108,22 @@ class _CountrySelectScreenState extends State<CountrySelectScreen> {
                         crossAxisSpacing: 12,
                         childAspectRatio: 0.85,
                       ),
-                      itemCount: Country.all.length,
+                      itemCount: categories.length,
                       itemBuilder: (context, index) {
-                        final country = Country.all[index];
-                        final countryCards =
-                            CardRepository.cardsForCountry(country.id);
-                        final collected = countryCards
-                            .where((c) => collection.isCollected(c.id))
+                        final category = categories[index];
+                        final catStickers =
+                            StickerRepository.stickersForCategory(category.id);
+                        final collected = catStickers
+                            .where((s) => collection.isCollected(s.id))
                             .length;
 
-                        return _CountryCard(
-                          country: country,
+                        return _CategoryCard(
+                          name: category.name,
+                          badgeAsset:
+                              widget.album.badgeAsset(category.id),
                           collectedCount: collected,
-                          totalCount: countryCards.length,
-                          onTap: () => _navigateToCountry(country.id),
+                          totalCount: catStickers.length,
+                          onTap: () => _navigateToCategory(category.id),
                         );
                       },
                     );
@@ -152,25 +138,27 @@ class _CountrySelectScreenState extends State<CountrySelectScreen> {
   }
 }
 
-/// A single country card in the grid.
-class _CountryCard extends StatefulWidget {
-  final Country country;
+/// A single category card in the grid.
+class _CategoryCard extends StatefulWidget {
+  final String name;
+  final String badgeAsset;
   final int collectedCount;
   final int totalCount;
   final VoidCallback onTap;
 
-  const _CountryCard({
-    required this.country,
+  const _CategoryCard({
+    required this.name,
+    required this.badgeAsset,
     required this.collectedCount,
     required this.totalCount,
     required this.onTap,
   });
 
   @override
-  State<_CountryCard> createState() => _CountryCardState();
+  State<_CategoryCard> createState() => _CategoryCardState();
 }
 
-class _CountryCardState extends State<_CountryCard>
+class _CategoryCardState extends State<_CategoryCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -246,7 +234,6 @@ class _CountryCardState extends State<_CountryCard>
           ),
           child: Stack(
             children: [
-              // Shimmer gradient for completed countries
               if (isComplete)
                 Positioned.fill(
                   child: DecoratedBox(
@@ -264,14 +251,13 @@ class _CountryCardState extends State<_CountryCard>
                     ),
                   ),
                 ),
-
-              // Card content
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Badge image
+                    // Badge
                     Container(
                       width: 64,
                       height: 64,
@@ -287,8 +273,8 @@ class _CountryCardState extends State<_CountryCard>
                         boxShadow: [
                           if (isComplete)
                             BoxShadow(
-                              color:
-                                  AppColors.goalGoldGlow.withValues(alpha: 0.3),
+                              color: AppColors.goalGoldGlow
+                                  .withValues(alpha: 0.3),
                               blurRadius: 10,
                               spreadRadius: 1,
                             ),
@@ -298,21 +284,21 @@ class _CountryCardState extends State<_CountryCard>
                         child: Padding(
                           padding: const EdgeInsets.all(8),
                           child: Image.asset(
-                            widget.country.badgeAsset,
+                            widget.badgeAsset,
                             fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) => Text(
-                              widget.country.flagEmoji,
-                              style: const TextStyle(fontSize: 28),
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.category,
+                              color: AppColors.textMuted,
+                              size: 28,
                             ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 10),
-
-                    // Country name
+                    // Name
                     Text(
-                      widget.country.name,
+                      widget.name,
                       style: GoogleFonts.outfit(
                         color: isComplete
                             ? AppColors.goalGold
@@ -325,7 +311,6 @@ class _CountryCardState extends State<_CountryCard>
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-
                     // Progress bar
                     ClipRRect(
                       borderRadius: BorderRadius.circular(3),
@@ -341,8 +326,7 @@ class _CountryCardState extends State<_CountryCard>
                       ),
                     ),
                     const SizedBox(height: 6),
-
-                    // Count text
+                    // Count
                     Text(
                       '${widget.collectedCount}/${widget.totalCount}',
                       style: GoogleFonts.orbitron(

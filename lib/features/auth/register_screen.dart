@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/services/collection_service.dart';
-import 'package:pack_vault/features/album/country_select_screen.dart';
+import 'package:pack_vault/features/albums/album_select_screen.dart';
 
 /// Hidden register screen, only accessible via admin/admin on login.
 class RegisterScreen extends StatefulWidget {
@@ -42,7 +42,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Navigator.of(context).pushAndRemoveUntil(
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 800),
-          pageBuilder: (_, a, b) => const CountrySelectScreen(),
+          pageBuilder: (_, a, b) => const AlbumSelectScreen(),
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(
               opacity: CurvedAnimation(

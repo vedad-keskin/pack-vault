@@ -120,8 +120,8 @@ class AuthService extends ChangeNotifier {
       _username = username;
       await _saveUsernameLocal(_user!.uid, username);
 
-      // Initialize user node in RTDB with all 432 cards as false
-      await _datasource.initializeUserCards(_user!.uid, username);
+      // Initialize user profile in RTDB (album data is lazy-initialized)
+      await _datasource.initializeUser(_user!.uid, username);
 
       _isLoading = false;
       notifyListeners();

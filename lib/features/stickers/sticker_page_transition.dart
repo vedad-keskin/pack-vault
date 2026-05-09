@@ -3,7 +3,7 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 /// Album-like page transition for the PageView.
 /// Creates a 3D page-curl effect with depth shadow.
-class AlbumPageTransformer {
+class StickerPageTransformer {
   /// Wraps a PageView child with the album flip transform.
   /// [position] is the page offset from the current page (-1 to 1).
   static Widget transform(Widget child, double position) {

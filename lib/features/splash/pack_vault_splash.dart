@@ -7,7 +7,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:pack_vault/firebase_options.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/data/datasources/firebase_datasource.dart';
-import 'package:pack_vault/data/repositories/card_repository.dart';
 
 /// Premium football-themed splash screen.
 /// Animates the logo while initializing Firebase + loading card data.
@@ -51,9 +50,7 @@ class _PackVaultSplashState extends State<PackVaultSplash>
   Future<void> _initialize() async {
     final stopwatch = Stopwatch()..start();
 
-    _updateStatus('Loading card database', 0.15);
-    await CardRepository.loadCards();
-    _updateStatus('Cards loaded', 0.35);
+    _updateStatus('Initializing', 0.2);
 
     _updateStatus('Connecting to Firebase', 0.5);
     try {
