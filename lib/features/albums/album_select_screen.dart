@@ -63,8 +63,10 @@ class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
     );
   }
 
-  void _openAlbum(BuildContext context, Album album) {
-    // Album data already pre-loaded in splash
+  void _openAlbum(BuildContext context, Album album) async {
+    // Load album data (no-op if already loaded, e.g. first album from splash)
+    await StickerRepository.loadAlbum(album);
+    if (!context.mounted) return;
     Navigator.of(context).push(
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 400),

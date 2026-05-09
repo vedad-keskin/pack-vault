@@ -11,26 +11,24 @@ import 'package:pack_vault/data/datasources/firebase_datasource.dart';
 ///   2. Load from SharedPreferences cache → show UI instantly
 ///   3. Subscribe to Firebase stream → replace local state
 ///   4. On toggleSticker: update optimistically + push to Firebase
-///   5. Lazy init: album data created in Firebase on first toggle
 class CollectionService extends ChangeNotifier {
   final FirebaseDatasource _datasource = FirebaseDatasource();
 
-  Map<int, bool> _stickers = {};
+  Map<String, bool> _stickers = {};
   bool _isLoading = true;
   String? _uid;
   String? _activeAlbumId;
   int _totalStickers = 0;
-  bool _albumInitialized = false;
   StreamSubscription? _subscription;
 
-  Map<int, bool> get stickers => _stickers;
+  Map<String, bool> get stickers => _stickers;
   bool get isLoading => _isLoading;
   String? get activeAlbumId => _activeAlbumId;
   int get collectedCount => _stickers.values.where((v) => v).length;
   int get totalStickers => _totalStickers;
   double get progress => _totalStickers > 0 ? collectedCount / _totalStickers : 0;
 
-  bool isCollected(int stickerId) => _stickers[stickerId] ?? false;
+  bool isCollected(String stickerId) => _stickers[stickerId] ?? false;
 
   // === Local Storage Keys ===
   static String _cacheKey(String uid, String albumId) => 'stickers_${uid}_$albumId';
@@ -42,7 +40,7 @@ class CollectionService extends ChangeNotifier {
       final jsonStr = prefs.getString(_cacheKey(uid, albumId));
       if (jsonStr != null) {
         final Map<String, dynamic> decoded = json.decode(jsonStr);
-        _stickers = decoded.map((k, v) => MapEntry(int.parse(k), v == true));
+        _stickers = decoded.map((k, v) => MapEntry(k, v == true));
         _isLoading = false;
         notifyListeners();
         debugPrint('Loaded $collectedCount stickers from local cache ($albumId)');
@@ -58,7 +56,7 @@ class CollectionService extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final Map<String, dynamic> encoded = _stickers.map(
-        (k, v) => MapEntry(k.toString(), v),
+        (k, v) => MapEntry(k, v),
       );
       await prefs.setString(
           _cacheKey(_uid!, _activeAlbumId!), json.encode(encoded));
@@ -91,7 +89,6 @@ class CollectionService extends ChangeNotifier {
     _uid = uid;
     _activeAlbumId = albumId;
     _totalStickers = totalStickers;
-    _albumInitialized = false;
 
     if (!wasPreloaded) {
       // Fresh start — show loading, read cache
@@ -118,7 +115,6 @@ class CollectionService extends ChangeNotifier {
       (firebaseStickers) {
         if (firebaseStickers.isNotEmpty) {
           _stickers = firebaseStickers;
-          _albumInitialized = true;
           _saveToLocal();
         }
         _isLoading = false;
@@ -153,33 +149,17 @@ class CollectionService extends ChangeNotifier {
   }
 
   /// Toggle a sticker's collected state.
-  /// Lazy-initializes album data in Firebase on first toggle.
-  Future<void> toggleSticker(int stickerId) async {
+  Future<void> toggleSticker(String stickerId) async {
     if (_uid == null || _activeAlbumId == null) return;
 
     final newState = !(_stickers[stickerId] ?? false);
-
-    // Lazy init: create album data in Firebase if not yet done
-    if (!_albumInitialized) {
-      try {
-        final exists =
-            await _datasource.albumExists(_uid!, _activeAlbumId!);
-        if (!exists) {
-          await _datasource.initializeAlbum(
-              _uid!, _activeAlbumId!, _totalStickers);
-        }
-        _albumInitialized = true;
-      } catch (e) {
-        debugPrint('Lazy init error: $e');
-      }
-    }
 
     // Optimistic UI update + local cache
     _stickers[stickerId] = newState;
     notifyListeners();
     _saveToLocal();
 
-    // Push to Firebase
+    // Push to Firebase (creates the path automatically)
     try {
       await _datasource.updateSticker(
           _uid!, _activeAlbumId!, stickerId, newState);
@@ -189,7 +169,7 @@ class CollectionService extends ChangeNotifier {
   }
 
   /// Get collected count for a specific category's stickers.
-  int collectedForCategory(List<int> stickerIds) {
+  int collectedForCategory(List<String> stickerIds) {
     return stickerIds.where((id) => _stickers[id] == true).length;
   }
 
@@ -201,7 +181,6 @@ class CollectionService extends ChangeNotifier {
     _uid = null;
     _activeAlbumId = null;
     _totalStickers = 0;
-    _albumInitialized = false;
     _isLoading = true;
     notifyListeners();
   }

@@ -13,7 +13,4 @@ class Album {
 
   /// Cover image path for album selection grid.
   String get coverAsset => 'assets/albums/$id.png';
-
-  /// Badge image path for a category. Badges are shared across albums.
-  String badgeAsset(int categoryId) => 'assets/badges/$categoryId.png';
 }

@@ -1,6 +1,6 @@
 /// A single sticker within an album.
 class Sticker {
-  final int id;
+  final String id;
   final String name;
   final int page;
   final int categoryId;
@@ -14,7 +14,7 @@ class Sticker {
 
   factory Sticker.fromJson(Map<String, dynamic> json) {
     return Sticker(
-      id: json['id'] as int,
+      id: json['id'].toString(), // handles both int and string IDs
       name: (json['name'] as String?) ?? '',
       page: json['page'] as int,
       categoryId: json['categoryId'] as int,

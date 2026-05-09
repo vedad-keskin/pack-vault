@@ -37,7 +37,7 @@ class StickerPage extends StatelessWidget {
               const SizedBox(height: 8),
               CategoryHeader(
                 name: category.name,
-                badgeAsset: album.badgeAsset(category.id),
+                badgeAsset: category.badgeAsset,
                 collectedCount: catCollected,
                 totalCount: catStickers.length,
                 pageNumber: pageNumber,
@@ -90,7 +90,7 @@ class StickerPage extends StatelessWidget {
 
       // Check if this row contains the wide card
       if (wideIndex != null && indices.contains(wideIndex)) {
-        // Wide row: first card is wide (2/3), second is regular (1/3)
+        // Wide row: wide card gets flex 2, others flex 1
         widgets.add(AspectRatio(
           aspectRatio: 2.4,
           child: Row(
@@ -100,18 +100,20 @@ class StickerPage extends StatelessWidget {
                 if (i > 0) const SizedBox(width: AppSizes.cardGridSpacing),
                 Expanded(
                   flex: indices[i] == wideIndex ? 2 : 1,
-                  child: _tile(
-                    stickers[indices[i]],
-                    collection,
-                    isBig: indices[i] == wideIndex,
-                  ),
+                  child: indices[i] < 0
+                      ? const SizedBox()
+                      : _tile(
+                          stickers[indices[i]],
+                          collection,
+                          isBig: indices[i] == wideIndex,
+                        ),
                 ),
               ],
             ],
           ),
         ));
       } else {
-        // Regular row of equal-width cards
+        // Regular row of equal-width cards (or empty spaces)
         widgets.add(AspectRatio(
           aspectRatio: 2.6,
           child: Row(
@@ -120,7 +122,10 @@ class StickerPage extends StatelessWidget {
               for (int i = 0; i < indices.length; i++) ...[
                 if (i > 0) const SizedBox(width: AppSizes.cardGridSpacing),
                 Expanded(
-                    child: _tile(stickers[indices[i]], collection)),
+                  child: indices[i] < 0
+                      ? const SizedBox()
+                      : _tile(stickers[indices[i]], collection),
+                ),
               ],
             ],
           ),

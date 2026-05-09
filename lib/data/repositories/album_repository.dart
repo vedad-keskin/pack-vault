@@ -1,6 +1,6 @@
 import 'package:pack_vault/data/models/album.dart';
 
-/// Registry of all available sticker albums.
+/// Static registry of all available sticker albums.
 class AlbumRepository {
   AlbumRepository._();
 
@@ -10,10 +10,10 @@ class AlbumRepository {
       name: 'World Cup 2026',
       dataAsset: 'lib/data/albums/wc2026.json',
     ),
-    // Future albums go here:
-    // Album(id: 'ucl2026', name: 'Champions League 2025/26', ...),
+    Album(
+      id: 'paniniwc2026',
+      name: 'Panini World Cup 2026',
+      dataAsset: 'lib/data/albums/paniniwc2026.json',
+    ),
   ];
-
-  static Album getById(String id) =>
-      albums.firstWhere((a) => a.id == id);
 }

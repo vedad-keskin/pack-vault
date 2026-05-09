@@ -119,8 +119,7 @@ class _CategorySelectScreenState extends State<CategorySelectScreen> {
 
                         return _CategoryCard(
                           name: category.name,
-                          badgeAsset:
-                              widget.album.badgeAsset(category.id),
+                          badgeAsset: category.badgeAsset,
                           collectedCount: collected,
                           totalCount: catStickers.length,
                           onTap: () => _navigateToCategory(category.id),

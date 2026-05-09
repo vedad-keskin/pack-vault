@@ -57,10 +57,11 @@ class _PackVaultSplashState extends State<PackVaultSplash>
 
     _updateStatus('Initializing', 0.15);
 
-    // Load all album data from bundled JSON assets
+    // Pre-load the first album's data from bundled JSON
     _updateStatus('Loading albums', 0.3);
-    for (final album in AlbumRepository.albums) {
-      await StickerRepository.loadAlbum(album);
+    final albums = AlbumRepository.albums;
+    if (albums.isNotEmpty) {
+      await StickerRepository.loadAlbum(albums.first);
     }
 
     _updateStatus('Connecting to Firebase', 0.55);
