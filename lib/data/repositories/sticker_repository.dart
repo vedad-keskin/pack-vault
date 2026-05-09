@@ -17,8 +17,10 @@ class StickerRepository {
   static List<Sticker> _stickers = [];
   static List<Category> _categories = [];
   static List<PageLayout> _pages = [];
-  /// Cache of total sticker counts per album id (survives album switches).
+  /// Cache of per-album counts (survives album switches).
   static final Map<String, int> _albumTotalStickers = {};
+  static final Map<String, int> _albumTotalCategories = {};
+  static final Map<String, int> _albumTotalPages = {};
 
   static Album? get activeAlbum => _activeAlbum;
   static List<Category> get categories => _categories;
@@ -26,8 +28,10 @@ class StickerRepository {
   static int get totalPages => _pages.length;
   static bool get isLoaded => _activeAlbum != null;
 
-  /// Get cached total sticker count for any album that was previously loaded.
+  /// Get cached counts for any album that was previously loaded.
   static int? totalStickersForAlbum(String albumId) => _albumTotalStickers[albumId];
+  static int? totalCategoriesForAlbum(String albumId) => _albumTotalCategories[albumId];
+  static int? totalPagesForAlbum(String albumId) => _albumTotalPages[albumId];
 
   /// Load an album's data from its JSON asset.
   static Future<void> loadAlbum(Album album) async {
@@ -50,6 +54,8 @@ class StickerRepository {
 
     _activeAlbum = album;
     _albumTotalStickers[album.id] = _stickers.length;
+    _albumTotalCategories[album.id] = _categories.length;
+    _albumTotalPages[album.id] = _pages.length;
   }
 
   /// All stickers on a given page.

@@ -237,6 +237,8 @@ class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
                             album: album,
                             collected: _albumProgress[album.id]?['collected'] ?? 0,
                             total: _albumProgress[album.id]?['total'] ?? 0,
+                            totalCategories: StickerRepository.totalCategoriesForAlbum(album.id) ?? 0,
+                            totalPages: StickerRepository.totalPagesForAlbum(album.id) ?? 0,
                             onTap: () => _openAlbum(context, album),
                           ),
                         ),
@@ -262,12 +264,16 @@ class _AlbumRow extends StatefulWidget {
   final Album album;
   final int collected;
   final int total;
+  final int totalCategories;
+  final int totalPages;
   final VoidCallback onTap;
 
   const _AlbumRow({
     required this.album,
     required this.collected,
     required this.total,
+    required this.totalCategories,
+    required this.totalPages,
     required this.onTap,
   });
 
@@ -386,19 +392,19 @@ class _AlbumRowState extends State<_AlbumRow>
                         children: [
                           _StatLabel(
                             icon: Icons.style,
-                            text: '432',
+                            text: '${widget.total}',
                             color: AppColors.pitchGreenGlow,
                           ),
                           const SizedBox(width: 14),
                           _StatLabel(
                             icon: Icons.flag,
-                            text: '26',
+                            text: '${widget.totalCategories}',
                             color: AppColors.goalGold,
                           ),
                           const SizedBox(width: 14),
                           _StatLabel(
                             icon: Icons.auto_stories,
-                            text: '51',
+                            text: '${widget.totalPages}',
                             color: AppColors.fireSecondary,
                           ),
                         ],

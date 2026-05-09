@@ -327,6 +327,32 @@ class _PackVaultSplashState extends State<PackVaultSplash>
                 }),
               ),
             ),
+
+            // === Version label ===
+            Positioned(
+              bottom: 32,
+              left: 0,
+              right: 0,
+              child: Builder(builder: (_) {
+                final vFade = _easeOut(_interval(t, 0.35, 0.55));
+                final fadeOut = t > 0.88
+                    ? (1.0 - _easeIn(_interval(t, 0.88, 1.0)))
+                    : 1.0;
+                return Opacity(
+                  opacity: (vFade * fadeOut).clamp(0.0, 1.0),
+                  child: Text(
+                    'Nightfall Project  v1.0.1',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.orbitron(
+                      fontSize: 10,
+                      color: AppColors.textMuted.withValues(alpha: 0.4),
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                );
+              }),
+            ),
           ],
         ),
       ),
