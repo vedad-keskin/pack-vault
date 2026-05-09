@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pack_vault/data/datasources/firebase_datasource.dart';
+import 'package:pack_vault/data/repositories/sticker_repository.dart';
+import 'package:pack_vault/data/repositories/album_repository.dart';
 
 /// Manages the user's sticker collection for a specific album.
 ///
@@ -32,6 +34,24 @@ class CollectionService extends ChangeNotifier {
 
   // === Local Storage Keys ===
   static String _cacheKey(String uid, String albumId) => 'stickers_${uid}_$albumId';
+
+  /// Read cached progress for ANY album without changing active state.
+  /// Returns {collected, total}. Used by AlbumSelectScreen for per-album counts.
+  static Future<Map<String, int>> getCachedAlbumProgress(
+      String uid, String albumId, int totalStickers) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_cacheKey(uid, albumId));
+      if (jsonStr != null) {
+        final Map<String, dynamic> decoded = json.decode(jsonStr);
+        final collected = decoded.values.where((v) => v == true).length;
+        return {'collected': collected, 'total': totalStickers};
+      }
+    } catch (e) {
+      debugPrint('getCachedAlbumProgress error: $e');
+    }
+    return {'collected': 0, 'total': totalStickers};
+  }
 
   /// Load stickers from SharedPreferences cache for instant startup display.
   Future<void> _loadFromLocal(String uid, String albumId) async {
@@ -152,6 +172,12 @@ class CollectionService extends ChangeNotifier {
   Future<void> toggleSticker(String stickerId) async {
     if (_uid == null || _activeAlbumId == null) return;
 
+    // If this is the first interaction with this album in Firebase,
+    // initialize all stickers as false first.
+    if (_stickers.length < _totalStickers) {
+      await _initializeAlbumInFirebase();
+    }
+
     final newState = !(_stickers[stickerId] ?? false);
 
     // Optimistic UI update + local cache
@@ -159,13 +185,56 @@ class CollectionService extends ChangeNotifier {
     notifyListeners();
     _saveToLocal();
 
-    // Push to Firebase (creates the path automatically)
+    // Push to Firebase
     try {
       await _datasource.updateSticker(
           _uid!, _activeAlbumId!, stickerId, newState);
     } catch (e) {
       debugPrint('Firebase sync error (will retry): $e');
     }
+  }
+
+  /// Initialize all stickers as false in Firebase and local state.
+  /// Called once when user first interacts with a new album.
+  Future<void> _initializeAlbumInFirebase() async {
+    if (_uid == null || _activeAlbumId == null) return;
+
+    // Ensure album data is loaded so we can read all sticker IDs
+    final album = AlbumRepository.albums.firstWhere(
+      (a) => a.id == _activeAlbumId,
+      orElse: () => AlbumRepository.albums.first,
+    );
+    await StickerRepository.loadAlbum(album);
+
+    // Build full map: preserve any existing collected states
+    final Map<String, bool> fullMap = {};
+    for (final stickerId in _getAllStickerIds()) {
+      fullMap[stickerId] = _stickers[stickerId] ?? false;
+    }
+
+    _stickers = fullMap;
+    notifyListeners();
+    _saveToLocal();
+
+    // Push the full map to Firebase
+    try {
+      await _datasource.pushAlbumStickers(_uid!, _activeAlbumId!, fullMap);
+      debugPrint('Initialized ${fullMap.length} stickers in Firebase for $_activeAlbumId');
+    } catch (e) {
+      debugPrint('Album init error: $e');
+    }
+  }
+
+  /// Get all sticker IDs from the currently loaded StickerRepository.
+  List<String> _getAllStickerIds() {
+    final List<String> ids = [];
+    for (final category in StickerRepository.categories) {
+      final stickers = StickerRepository.stickersForCategory(category.id);
+      for (final s in stickers) {
+        ids.add(s.id);
+      }
+    }
+    return ids;
   }
 
   /// Get collected count for a specific category's stickers.

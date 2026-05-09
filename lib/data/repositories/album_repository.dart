@@ -14,6 +14,7 @@ class AlbumRepository {
       id: 'paniniwc2026',
       name: 'Panini World Cup 2026',
       dataAsset: 'lib/data/albums/paniniwc2026.json',
+      stickerFontScale: 0.75,
     ),
   ];
 }

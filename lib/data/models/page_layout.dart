@@ -66,6 +66,18 @@ class PageLayout {
       [3, 4, 5, 6],
       [-1, 7, 8, 9],
     ],
+    // 4-column grid: 12 stickers
+    'grid_12': [
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [8, 9, 10, 11],
+    ],
+    // 4-column grid: 11 stickers (one empty slot top-left)
+    'grid_11': [
+      [-1, 0, 1, 2],
+      [3, 4, 5, 6],
+      [7, 8, 9, 10],
+    ],
   };
 
   static const Map<String, int> _layoutWideIndex = {

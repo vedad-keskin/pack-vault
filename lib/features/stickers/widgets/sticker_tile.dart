@@ -10,6 +10,7 @@ class StickerTile extends StatefulWidget {
   final bool isCollected;
   final VoidCallback onToggle;
   final bool isBig;
+  final double stickerFontScale;
 
   const StickerTile({
     super.key,
@@ -17,6 +18,7 @@ class StickerTile extends StatefulWidget {
     required this.isCollected,
     required this.onToggle,
     this.isBig = false,
+    this.stickerFontScale = 1.0,
   });
 
   @override
@@ -35,14 +37,14 @@ class _StickerTileState extends State<StickerTile>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.08), weight: 40),
-      TweenSequenceItem(tween: Tween(begin: 1.08, end: 1.0), weight: 30),
-    ]).animate(CurvedAnimation(
-      parent: _bounceController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 30),
+          TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.08), weight: 40),
+          TweenSequenceItem(tween: Tween(begin: 1.08, end: 1.0), weight: 30),
+        ]).animate(
+          CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+        );
   }
 
   @override
@@ -61,17 +63,14 @@ class _StickerTileState extends State<StickerTile>
     final collected = widget.isCollected;
     final big = widget.isBig;
 
-    final numberSize = big ? 22.0 : 17.0;
-    final nameSize = big ? 13.0 : 11.0;
+    final numberSize = (big ? 22.0 : 17.0) * widget.stickerFontScale;
+    final nameSize = (big ? 13.0 : 11.0) * widget.stickerFontScale;
     final iconSize = big ? 28.0 : 24.0;
 
     return AnimatedBuilder(
       animation: _scaleAnimation,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        );
+        return Transform.scale(scale: _scaleAnimation.value, child: child);
       },
       child: GestureDetector(
         onTap: _handleTap,
@@ -92,8 +91,7 @@ class _StickerTileState extends State<StickerTile>
             boxShadow: collected
                 ? [
                     BoxShadow(
-                      color:
-                          AppColors.pitchGreenGlow.withValues(alpha: 0.25),
+                      color: AppColors.pitchGreenGlow.withValues(alpha: 0.25),
                       blurRadius: 12,
                       spreadRadius: 1,
                     ),
@@ -112,8 +110,7 @@ class _StickerTileState extends State<StickerTile>
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.radiusSm),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -144,19 +141,25 @@ class _StickerTileState extends State<StickerTile>
                       ),
                       SizedBox(height: big ? 8 : 4),
                       if (widget.sticker.name.isNotEmpty)
-                        Text(
-                          widget.sticker.name,
-                          style: GoogleFonts.inter(
-                            color: collected
-                                ? AppColors.textPrimary
-                                : AppColors.textMuted,
-                            fontSize: nameSize,
-                            fontWeight:
-                                big ? FontWeight.w500 : FontWeight.normal,
+                        SizedBox(
+                          // Always reserve space for exactly 2 lines
+                          height: nameSize * 2 * 1.3,
+                          child: Text(
+                            widget.sticker.name,
+                            style: GoogleFonts.inter(
+                              color: collected
+                                  ? AppColors.textPrimary
+                                  : AppColors.textMuted,
+                              fontSize: nameSize,
+                              fontWeight: big
+                                  ? FontWeight.w500
+                                  : FontWeight.normal,
+                              height: 1.3,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          textAlign: TextAlign.center,
-                          maxLines: big ? 3 : 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       SizedBox(height: big ? 10 : 6),
                       AnimatedSwitcher(
@@ -171,8 +174,9 @@ class _StickerTileState extends State<StickerTile>
                             : Icon(
                                 Icons.radio_button_unchecked,
                                 key: const ValueKey('uncollected'),
-                                color: AppColors.textMuted
-                                    .withValues(alpha: 0.5),
+                                color: AppColors.textMuted.withValues(
+                                  alpha: 0.5,
+                                ),
                                 size: iconSize,
                               ),
                       ),

@@ -2,7 +2,7 @@
   "categories": [
     {
       "id": 1,
-      "name": "FIFA Host",
+      "name": "World Cup Host",
       "badgeAssetId": 26
     },
     {
@@ -244,6 +244,16 @@
       "id": 49,
       "name": "Panama",
       "badgeAssetId": 50
+    },
+    {
+      "id": 50,
+      "name": "World Cup History",
+      "badgeAssetId": 26
+    },
+    {
+      "id": 51,
+      "name": "Coca-Cola",
+      "badgeAssetId": 51
     }
   ],
   "pages": [
@@ -731,6 +741,16 @@
       "page": 97,
       "categoryId": 49,
       "layout": "panini_b"
+    },
+    {
+      "page": 98,
+      "categoryId": 50,
+      "layout": "grid_11"
+    },
+    {
+      "page": 99,
+      "categoryId": 51,
+      "layout": "grid_12"
     }
   ],
   "stickers": [
@@ -6547,6 +6567,144 @@
       "name": "Alberto Quintero",
       "page": 97,
       "categoryId": 49
+    },
+    {
+      "id": "FWC9",
+      "name": "Italy 1934",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC10",
+      "name": "Uruguay 1950",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC11",
+      "name": "West Germany 1954",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC12",
+      "name": "Brazil 1962",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC13",
+      "name": "West Germany 1974",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC14",
+      "name": "Argentina 1986",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC15",
+      "name": "Brazil 1994",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC16",
+      "name": "Brazil 2002",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC17",
+      "name": "Italy 2006",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC18",
+      "name": "Germany 2014",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "FWC19",
+      "name": "Argentina 2022",
+      "page": 98,
+      "categoryId": 50
+    },
+    {
+      "id": "CC1",
+      "name": "Lamine Yamal",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC2",
+      "name": "Joshua Kimmich",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC3",
+      "name": "Harry Kane",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC4",
+      "name": "Santiago Giménez",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC5",
+      "name": "Antonee Robinson",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC6",
+      "name": "Jefferson Lerma",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC7",
+      "name": "Edson Álvarez",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC8",
+      "name": "Virgil van Dijk",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC9",
+      "name": "Alphonso Davies",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC10",
+      "name": "Weston McKennie",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC11",
+      "name": "Lautaro Martínez",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC12",
+      "name": "Gabriel Magalhães",
+      "page": 99,
+      "categoryId": 51
     }
   ]
 }

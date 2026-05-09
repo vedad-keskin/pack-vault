@@ -143,6 +143,7 @@ class StickerPage extends StatelessWidget {
       isCollected: collection.isCollected(sticker.id),
       onToggle: () => collection.toggleSticker(sticker.id),
       isBig: isBig,
+      stickerFontScale: album.stickerFontScale,
     );
   }
 }

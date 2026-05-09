@@ -21,27 +21,55 @@ class AlbumSelectScreen extends StatefulWidget {
 }
 
 class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
+  /// Per-album progress: albumId → {collected, total}
+  final Map<String, Map<String, int>> _albumProgress = {};
+
   @override
   void initState() {
     super.initState();
-    // Eagerly load album data + start listening so progress shows immediately
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startCollectionListening());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadAllAlbumProgress());
   }
 
-  void _startCollectionListening() {
+  /// Load cached progress for every album.
+  Future<void> _loadAllAlbumProgress() async {
     final auth = context.read<AuthService>();
     if (!auth.isLoggedIn) return;
 
-    // Album data is pre-loaded in splash — just start listening for progress
-    final albums = AlbumRepository.albums;
-    if (albums.isNotEmpty) {
-      final album = albums.first;
-      final collection = context.read<CollectionService>();
-      collection.startListening(
+    // Pre-load all albums so totalStickersForAlbum() has data
+    for (final album in AlbumRepository.albums) {
+      await StickerRepository.loadAlbum(album);
+    }
+
+    // Now read cached progress using the stored totals
+    for (final album in AlbumRepository.albums) {
+      final total = StickerRepository.totalStickersForAlbum(album.id) ?? 0;
+      final progress = await CollectionService.getCachedAlbumProgress(
         auth.uid,
         album.id,
-        StickerRepository.totalStickers,
+        total,
       );
+
+      if (mounted) {
+        setState(() {
+          _albumProgress[album.id] = progress;
+        });
+      }
+    }
+
+    // Also use live CollectionService data for the active album
+    _syncLiveProgress();
+  }
+
+  /// Sync live CollectionService counts into _albumProgress for the active album.
+  void _syncLiveProgress() {
+    final collection = context.read<CollectionService>();
+    if (collection.activeAlbumId != null) {
+      setState(() {
+        _albumProgress[collection.activeAlbumId!] = {
+          'collected': collection.collectedCount,
+          'total': collection.totalStickers,
+        };
+      });
     }
   }
 
@@ -64,10 +92,22 @@ class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
   }
 
   void _openAlbum(BuildContext context, Album album) async {
-    // Load album data (no-op if already loaded, e.g. first album from splash)
+    // Load album data (no-op if already loaded)
     await StickerRepository.loadAlbum(album);
     if (!context.mounted) return;
-    Navigator.of(context).push(
+
+    // Switch collection service to this album
+    final auth = context.read<AuthService>();
+    final collection = context.read<CollectionService>();
+    if (auth.isLoggedIn) {
+      collection.startListening(
+        auth.uid,
+        album.id,
+        StickerRepository.totalStickers,
+      );
+    }
+
+    await Navigator.of(context).push(
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 400),
           reverseTransitionDuration: const Duration(milliseconds: 350),
@@ -90,13 +130,40 @@ class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
           },
         ),
     );
+
+    // Refresh all album progress when returning
+    if (mounted) {
+      _loadAllAlbumProgress();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
     final albums = AlbumRepository.albums;
+
+    // Keep live progress in sync for the active album
     final collection = context.watch<CollectionService>();
+    if (collection.activeAlbumId != null && !collection.isLoading) {
+      // Update cached progress for the active album with live data
+      final liveProgress = {
+        'collected': collection.collectedCount,
+        'total': collection.totalStickers,
+      };
+      // Only update if different to avoid infinite rebuilds
+      final current = _albumProgress[collection.activeAlbumId!];
+      if (current == null ||
+          current['collected'] != liveProgress['collected'] ||
+          current['total'] != liveProgress['total']) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _albumProgress[collection.activeAlbumId!] = liveProgress;
+            });
+          }
+        });
+      }
+    }
 
     return Scaffold(
       body: Stack(
@@ -168,12 +235,8 @@ class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
                           padding: const EdgeInsets.only(bottom: 14),
                           child: _AlbumRow(
                             album: album,
-                            collected: collection.activeAlbumId == album.id
-                                ? collection.collectedCount
-                                : 0,
-                            total: collection.activeAlbumId == album.id
-                                ? collection.totalStickers
-                                : 432,
+                            collected: _albumProgress[album.id]?['collected'] ?? 0,
+                            total: _albumProgress[album.id]?['total'] ?? 0,
                             onTap: () => _openAlbum(context, album),
                           ),
                         ),
