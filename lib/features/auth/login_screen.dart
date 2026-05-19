@@ -141,10 +141,11 @@ class LoginScreen extends StatelessWidget {
                       children: [
                         Text(
                           "Don't have an account? ",
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.orbitron(
                             color: AppColors.textMuted,
-                            fontSize: 12,
+                            fontSize: 10,
                             fontWeight: FontWeight.w400,
+                            letterSpacing: 1,
                           ),
                         ),
                         GestureDetector(

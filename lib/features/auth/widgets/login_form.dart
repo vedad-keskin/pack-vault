@@ -228,12 +228,14 @@ class _LoginFormState extends State<LoginForm>
                     shadowColor: AppColors.pitchGreen.withValues(alpha: 0.4),
                   ),
                   child: widget.isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
+                      ? const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
                           ),
                         )
                       : Text(

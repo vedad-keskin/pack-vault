@@ -319,12 +319,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           .withValues(alpha: 0.4),
                                     ),
                                     child: auth.isLoading
-                                        ? const SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2.5,
-                                              color: AppColors.pitchDark,
+                                        ? const Center(
+                                            child: SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.5,
+                                                color: AppColors.pitchDark,
+                                              ),
                                             ),
                                           )
                                         : Text(
