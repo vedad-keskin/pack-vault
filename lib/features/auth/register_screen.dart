@@ -5,7 +5,7 @@ import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/services/auth_service.dart';
 import 'package:pack_vault/features/albums/album_select_screen.dart';
 
-/// Hidden register screen, only accessible via admin/admin on login.
+/// Registration screen for new users.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -198,8 +198,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       return 'Enter a username';
                                     if (v.trim().length < 3)
                                       return 'Min 3 characters';
-                                    if (v.trim() == 'admin')
-                                      return 'Cannot use "admin"';
                                     return null;
                                   },
                                   textInputAction: TextInputAction.next,

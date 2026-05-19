@@ -40,10 +40,8 @@ class _PackVaultSplashState extends State<PackVaultSplash>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.minDuration,
-    )..forward();
+    _controller = AnimationController(vsync: this, duration: widget.minDuration)
+      ..forward();
 
     _controller.addListener(() {
       if (mounted) setState(() {});
@@ -121,7 +119,10 @@ class _PackVaultSplashState extends State<PackVaultSplash>
         pageBuilder: (_, __, ___) => widget.nextBuilder(_firebaseReady),
         transitionsBuilder: (_, animation, __, child) {
           return FadeTransition(
-            opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            ),
             child: child,
           );
         },
@@ -165,73 +166,85 @@ class _PackVaultSplashState extends State<PackVaultSplash>
 
             // === Animated football particles ===
             Positioned.fill(
-              child: CustomPaint(
-                painter: _FootballParticlePainter(time: t),
-              ),
+              child: CustomPaint(painter: _FootballParticlePainter(time: t)),
             ),
 
             // === Stadium floodlight beams ===
             Positioned.fill(
               child: IgnorePointer(
-                child: Builder(builder: (_) {
-                  final beamIn = _easeOut(_interval(t, 0.03, 0.25));
-                  final sweep = sin(t * pi * 3) * 0.5 + 0.5;
-                  final beamOut = t > 0.88 ? (1.0 - _interval(t, 0.88, 1.0)) : 1.0;
-                  return CustomPaint(
-                    painter: _FloodlightPainter(
-                      opacity: (beamIn * beamOut * 0.35).clamp(0.0, 0.35),
-                      sweep: sweep,
-                    ),
-                  );
-                }),
+                child: Builder(
+                  builder: (_) {
+                    final beamIn = _easeOut(_interval(t, 0.03, 0.25));
+                    final sweep = sin(t * pi * 3) * 0.5 + 0.5;
+                    final beamOut = t > 0.88
+                        ? (1.0 - _interval(t, 0.88, 1.0))
+                        : 1.0;
+                    return CustomPaint(
+                      painter: _FloodlightPainter(
+                        opacity: (beamIn * beamOut * 0.35).clamp(0.0, 0.35),
+                        sweep: sweep,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
             // === Stadium glow behind logo ===
             Positioned.fill(
               child: IgnorePointer(
-                child: Builder(builder: (_) {
-                  final glowIn = _easeOut(_interval(t, 0.05, 0.3));
-                  final pulse = (sin(t * pi * 4) * 0.5 + 0.5);
-                  final glowAlpha = (0.18 + 0.14 * pulse) * glowIn;
-                  final glowOut = t > 0.9 ? (1.0 - _interval(t, 0.9, 1.0)) : 1.0;
-                  return CustomPaint(
-                    painter: _StadiumGlowPainter(
-                      opacity: (glowAlpha * glowOut).clamp(0.0, 0.45),
-                    ),
-                  );
-                }),
+                child: Builder(
+                  builder: (_) {
+                    final glowIn = _easeOut(_interval(t, 0.05, 0.3));
+                    final pulse = (sin(t * pi * 4) * 0.5 + 0.5);
+                    final glowAlpha = (0.18 + 0.14 * pulse) * glowIn;
+                    final glowOut = t > 0.9
+                        ? (1.0 - _interval(t, 0.9, 1.0))
+                        : 1.0;
+                    return CustomPaint(
+                      painter: _StadiumGlowPainter(
+                        opacity: (glowAlpha * glowOut).clamp(0.0, 0.45),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
             // === Pitch lines overlay ===
             Positioned.fill(
               child: IgnorePointer(
-                child: Builder(builder: (_) {
-                  final lineAlpha = _easeOut(_interval(t, 0.1, 0.4));
-                  final lineOut = t > 0.88 ? (1.0 - _interval(t, 0.88, 1.0)) : 1.0;
-                  return CustomPaint(
-                    painter: _PitchLinePainter(
-                      opacity: (lineAlpha * lineOut * 0.06).clamp(0.0, 0.08),
-                    ),
-                  );
-                }),
+                child: Builder(
+                  builder: (_) {
+                    final lineAlpha = _easeOut(_interval(t, 0.1, 0.4));
+                    final lineOut = t > 0.88
+                        ? (1.0 - _interval(t, 0.88, 1.0))
+                        : 1.0;
+                    return CustomPaint(
+                      painter: _PitchLinePainter(
+                        opacity: (lineAlpha * lineOut * 0.06).clamp(0.0, 0.08),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
             // === Light sweep overlay ===
             Positioned.fill(
               child: IgnorePointer(
-                child: Builder(builder: (_) {
-                  final sweepPhase = (t * 2.5) % 1.0;
-                  final sweepAlpha = t > 0.1 && t < 0.85 ? 0.06 : 0.0;
-                  return CustomPaint(
-                    painter: _LightSweepPainter(
-                      phase: sweepPhase,
-                      opacity: sweepAlpha,
-                    ),
-                  );
-                }),
+                child: Builder(
+                  builder: (_) {
+                    final sweepPhase = (t * 2.5) % 1.0;
+                    final sweepAlpha = t > 0.1 && t < 0.85 ? 0.06 : 0.0;
+                    return CustomPaint(
+                      painter: _LightSweepPainter(
+                        phase: sweepPhase,
+                        opacity: sweepAlpha,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
@@ -254,77 +267,81 @@ class _PackVaultSplashState extends State<PackVaultSplash>
             // === Main content ===
             SafeArea(
               child: Center(
-                child: Builder(builder: (_) {
-                  final logoScale = _easeOutBack(_interval(t, 0.05, 0.38));
-                  final logoFade = _easeOut(_interval(t, 0.02, 0.2));
-                  final titleFade = _easeOut(_interval(t, 0.18, 0.42));
-                  final titleSlide = 1.0 - _easeOut(_interval(t, 0.18, 0.42));
-                  final subFade = _easeOut(_interval(t, 0.28, 0.5));
-                  final barFade = _easeOut(_interval(t, 0.22, 0.42));
-                  final shimmer = sin(t * pi * 5) * 0.5 + 0.5;
-                  final fadeOut = t > 0.88
-                      ? (1.0 - _easeIn(_interval(t, 0.88, 1.0)))
-                      : 1.0;
+                child: Builder(
+                  builder: (_) {
+                    final logoScale = _easeOutBack(_interval(t, 0.05, 0.38));
+                    final logoFade = _easeOut(_interval(t, 0.02, 0.2));
+                    final titleFade = _easeOut(_interval(t, 0.18, 0.42));
+                    final titleSlide = 1.0 - _easeOut(_interval(t, 0.18, 0.42));
+                    final subFade = _easeOut(_interval(t, 0.28, 0.5));
+                    final barFade = _easeOut(_interval(t, 0.22, 0.42));
+                    final shimmer = sin(t * pi * 5) * 0.5 + 0.5;
+                    final fadeOut = t > 0.88
+                        ? (1.0 - _easeIn(_interval(t, 0.88, 1.0)))
+                        : 1.0;
 
-                  return Opacity(
-                    opacity: fadeOut.clamp(0.0, 1.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // === Logo ===
-                        Opacity(
-                          opacity: logoFade.clamp(0.0, 1.0),
-                          child: Transform.scale(
-                            scale: (0.5 + 0.5 * logoScale).clamp(0.0, 1.1),
-                            child: _LogoDisplay(shimmer: shimmer),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-
-                        // === Title: STICKR ===
-                        Opacity(
-                          opacity: titleFade.clamp(0.0, 1.0),
-                          child: Transform.translate(
-                            offset: Offset(0, titleSlide * 16),
-                            child: _FireTitle(shimmer: shimmer),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-
-                        // === Subtitle ===
-                        Opacity(
-                          opacity: subFade.clamp(0.0, 1.0),
-                          child: Text(
-                            'STICKERS COLLECTING',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              color: AppColors.textSecondary.withValues(alpha: 0.7),
-                              letterSpacing: 4,
-                              fontWeight: FontWeight.w500,
+                    return Opacity(
+                      opacity: fadeOut.clamp(0.0, 1.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // === Logo ===
+                          Opacity(
+                            opacity: logoFade.clamp(0.0, 1.0),
+                            child: Transform.scale(
+                              scale: (0.5 + 0.5 * logoScale).clamp(0.0, 1.1),
+                              child: _LogoDisplay(shimmer: shimmer),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 44),
+                          const SizedBox(height: 32),
 
-                        // === Stadium scoreboard progress ===
-                        Opacity(
-                          opacity: barFade.clamp(0.0, 1.0),
-                          child: _ScoreboardProgress(
-                            value: _initProgress,
-                            shimmer: shimmer,
+                          // === Title: STICKR ===
+                          Opacity(
+                            opacity: titleFade.clamp(0.0, 1.0),
+                            child: Transform.translate(
+                              offset: Offset(0, titleSlide * 16),
+                              child: _FireTitle(shimmer: shimmer),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 10),
 
-                        // === Status text ===
-                        Opacity(
-                          opacity: barFade.clamp(0.0, 1.0),
-                          child: _StatusText(text: _statusText, phase: t),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+                          // === Subtitle ===
+                          Opacity(
+                            opacity: subFade.clamp(0.0, 1.0),
+                            child: Text(
+                              'STICKERS COLLECTING',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: AppColors.textSecondary.withValues(
+                                  alpha: 0.7,
+                                ),
+                                letterSpacing: 4,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 44),
+
+                          // === Stadium scoreboard progress ===
+                          Opacity(
+                            opacity: barFade.clamp(0.0, 1.0),
+                            child: _ScoreboardProgress(
+                              value: _initProgress,
+                              shimmer: shimmer,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // === Status text ===
+                          Opacity(
+                            opacity: barFade.clamp(0.0, 1.0),
+                            child: _StatusText(text: _statusText, phase: t),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
@@ -333,25 +350,27 @@ class _PackVaultSplashState extends State<PackVaultSplash>
               bottom: 32,
               left: 0,
               right: 0,
-              child: Builder(builder: (_) {
-                final vFade = _easeOut(_interval(t, 0.35, 0.55));
-                final fadeOut = t > 0.88
-                    ? (1.0 - _easeIn(_interval(t, 0.88, 1.0)))
-                    : 1.0;
-                return Opacity(
-                  opacity: (vFade * fadeOut).clamp(0.0, 1.0),
-                  child: Text(
-                    'Nightfall Project  v1.0.1',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.orbitron(
-                      fontSize: 10,
-                      color: AppColors.textMuted.withValues(alpha: 0.4),
-                      letterSpacing: 2,
-                      fontWeight: FontWeight.w400,
+              child: Builder(
+                builder: (_) {
+                  final vFade = _easeOut(_interval(t, 0.35, 0.55));
+                  final fadeOut = t > 0.88
+                      ? (1.0 - _easeIn(_interval(t, 0.88, 1.0)))
+                      : 1.0;
+                  return Opacity(
+                    opacity: (vFade * fadeOut).clamp(0.0, 1.0),
+                    child: Text(
+                      'Nightfall Project  v1.0.2',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.orbitron(
+                        fontSize: 10,
+                        color: AppColors.textMuted.withValues(alpha: 0.4),
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -372,7 +391,9 @@ class _LogoDisplay extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1E90FF).withValues(alpha: 0.15 + 0.12 * shimmer),
+            color: const Color(
+              0xFF1E90FF,
+            ).withValues(alpha: 0.15 + 0.12 * shimmer),
             blurRadius: 50,
             spreadRadius: 8,
           ),
@@ -479,9 +500,7 @@ class _ScoreboardProgress extends StatelessWidget {
           style: GoogleFonts.orbitron(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: v >= 1.0
-                ? AppColors.goalGold
-                : AppColors.textSecondary,
+            color: v >= 1.0 ? AppColors.goalGold : AppColors.textSecondary,
             letterSpacing: 2,
           ),
         ),
@@ -491,10 +510,7 @@ class _ScoreboardProgress extends StatelessWidget {
           width: 280,
           height: 6,
           child: CustomPaint(
-            painter: _SegmentedBarPainter(
-              value: v,
-              shimmer: shimmer,
-            ),
+            painter: _SegmentedBarPainter(value: v, shimmer: shimmer),
           ),
         ),
       ],
@@ -544,8 +560,7 @@ class _SegmentedBarPainter extends CustomPainter {
           canvas.drawRRect(rect, glowPaint);
         }
       } else {
-        final paint = Paint()
-          ..color = const Color(0xFF1A2A44).withOpacity(0.8);
+        final paint = Paint()..color = const Color(0xFF1A2A44).withOpacity(0.8);
         canvas.drawRRect(rect, paint);
       }
     }
@@ -672,7 +687,8 @@ class _StadiumGlowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _StadiumGlowPainter old) => old.opacity != opacity;
+  bool shouldRepaint(covariant _StadiumGlowPainter old) =>
+      old.opacity != opacity;
 }
 
 // ─── Light Sweep Painter ─────────────────────────────────────────────
@@ -697,10 +713,7 @@ class _LightSweepPainter extends CustomPainter {
         ],
       ).createShader(Rect.fromLTWH(sweepX, 0, sweepW, size.height));
 
-    canvas.drawRect(
-      Rect.fromLTWH(sweepX, 0, sweepW, size.height),
-      paint,
-    );
+    canvas.drawRect(Rect.fromLTWH(sweepX, 0, sweepW, size.height), paint);
   }
 
   @override
@@ -779,7 +792,8 @@ class _FootballParticlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _FootballParticlePainter old) => old.time != time;
+  bool shouldRepaint(covariant _FootballParticlePainter old) =>
+      old.time != time;
 }
 
 // ─── Easing helpers ──────────────────────────────────────────────────

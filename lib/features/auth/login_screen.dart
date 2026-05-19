@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:pack_vault/core/constants/app_constants.dart';
 import 'package:pack_vault/services/auth_service.dart';
@@ -113,22 +114,13 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Login form (login only — no register)
+                    // Login form
                     Consumer<AuthService>(
                       builder: (context, auth, _) {
                         return LoginForm(
                           isLoading: auth.isLoading,
                           error: auth.error,
                           onSubmit: (username, password) async {
-                            // Admin backdoor → register screen
-                            if (username == 'admin' && password == 'admin') {
-                              auth.clearError();
-                              if (context.mounted) {
-                                _navigateToRegister(context);
-                              }
-                              return false;
-                            }
-
                             final success = await auth.login(
                               username,
                               password,
@@ -140,6 +132,34 @@ class LoginScreen extends StatelessWidget {
                           },
                         );
                       },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Register link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: GoogleFonts.inter(
+                            color: AppColors.textMuted,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _navigateToRegister(context),
+                          child: Text(
+                            'SIGN UP',
+                            style: GoogleFonts.orbitron(
+                              color: AppColors.goalGold,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
