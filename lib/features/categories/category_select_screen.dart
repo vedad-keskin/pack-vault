@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -68,6 +69,61 @@ class _CategorySelectScreenState extends State<CategorySelectScreen> {
     );
   }
 
+  void _copyMissing(CollectionService collection) {
+    // Gather all sticker IDs in album order
+    final allStickers = <String>[];
+    for (final cat in StickerRepository.categories) {
+      allStickers.addAll(
+        StickerRepository.stickersForCategory(cat.id).map((s) => s.id),
+      );
+    }
+
+    // Filter uncollected (isCollected returns false for uninitialized too)
+    final missing =
+        allStickers.where((id) => !collection.isCollected(id)).toList();
+
+    if (missing.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'You have all stickers! \u{1F389}',
+            style: GoogleFonts.orbitron(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: AppColors.pitchGreen,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    final text = missing.join(', ');
+    Clipboard.setData(ClipboardData(text: text));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Copied ${missing.length} missing stickers',
+          style: GoogleFonts.orbitron(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        backgroundColor: AppColors.surface,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
@@ -87,6 +143,30 @@ class _CategorySelectScreenState extends State<CategorySelectScreen> {
                     username: auth.username ?? 'Player',
                     onLogout: null,
                     onBack: () => Navigator.of(context).pop(),
+                    trailing: GestureDetector(
+                      onTap: () => _copyMissing(collection),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.copy_rounded,
+                                size: 13, color: AppColors.textMuted),
+                            const SizedBox(width: 5),
+                            Text(
+                              'COPY MISSING',
+                              style: GoogleFonts.orbitron(
+                                fontSize: 9,
+                                color: AppColors.textMuted,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),

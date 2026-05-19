@@ -10,6 +10,7 @@ class CollectionStats extends StatelessWidget {
   final String username;
   final VoidCallback? onLogout;
   final VoidCallback? onBack;
+  final Widget? trailing;
 
   const CollectionStats({
     super.key,
@@ -18,6 +19,7 @@ class CollectionStats extends StatelessWidget {
     required this.username,
     this.onLogout,
     this.onBack,
+    this.trailing,
   });
 
   @override
@@ -60,6 +62,7 @@ class CollectionStats extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
+                if (trailing != null) trailing!,
                 if (onLogout != null)
                   IconButton(
                     onPressed: onLogout,
