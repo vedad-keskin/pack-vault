@@ -6648,61 +6648,61 @@
     },
     {
       "id": "CC3",
-      "name": "Harry Kane",
+      "name": "Eduardo Camavinga",
       "page": 99,
       "categoryId": 51
     },
     {
       "id": "CC4",
-      "name": "Santiago Giménez",
+      "name": "Joško Gvardiol",
       "page": 99,
       "categoryId": 51
     },
     {
       "id": "CC5",
-      "name": "Antonee Robinson",
+      "name": "Federico Valverde",
       "page": 99,
       "categoryId": 51
     },
     {
       "id": "CC6",
-      "name": "Jefferson Lerma",
-      "page": 99,
-      "categoryId": 51
-    },
-    {
-      "id": "CC7",
-      "name": "Edson Álvarez",
-      "page": 99,
-      "categoryId": 51
-    },
-    {
-      "id": "CC8",
       "name": "Virgil van Dijk",
       "page": 99,
       "categoryId": 51
     },
     {
-      "id": "CC9",
+      "id": "CC7",
       "name": "Alphonso Davies",
       "page": 99,
       "categoryId": 51
     },
     {
-      "id": "CC10",
-      "name": "Weston McKennie",
+      "id": "CC8",
+      "name": "Raúl Jiménez",
       "page": 99,
       "categoryId": 51
     },
     {
-      "id": "CC11",
+      "id": "CC9",
+      "name": "William Saliba",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
+      "id": "CC10",
       "name": "Lautaro Martínez",
       "page": 99,
       "categoryId": 51
     },
     {
+      "id": "CC11",
+      "name": "Harry Kane",
+      "page": 99,
+      "categoryId": 51
+    },
+    {
       "id": "CC12",
-      "name": "Gabriel Magalhães",
+      "name": "Antonee Robinson",
       "page": 99,
       "categoryId": 51
     }
