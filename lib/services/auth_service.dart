@@ -135,7 +135,11 @@ class AuthService extends ChangeNotifier {
         _error = 'Registration failed: ${e.message}';
       }
     } catch (e) {
-      _error = 'Connection error. Check your internet.';
+      if (e.toString().contains('permission-denied')) {
+        _error = 'Server configuration error. Contact support.';
+      } else {
+        _error = 'Connection error. Check your internet.';
+      }
       debugPrint('Register error: $e');
     }
 

@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"pack-vault-be672","appId":"1:696407003370:android:9ff6cca29d809c1bc04793","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"pack-vault-be672","configurations":{"android":"1:696407003370:android:9ff6cca29d809c1bc04793","ios":"1:696407003370:ios:cc8b4415f4046e01c04793"}}}}}}
+{
+  "database": {
+    "rules": "database.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "pack-vault-be672",
+          "appId": "1:696407003370:android:9ff6cca29d809c1bc04793",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "pack-vault-be672",
+          "configurations": {
+            "android": "1:696407003370:android:9ff6cca29d809c1bc04793",
+            "ios": "1:696407003370:ios:cc8b4415f4046e01c04793"
+          }
+        }
+      }
+    }
+  }
+}
