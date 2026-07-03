@@ -23,6 +23,7 @@ class AlbumSelectScreen extends StatefulWidget {
 class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
   /// Per-album progress: albumId → {collected, total}
   final Map<String, Map<String, int>> _albumProgress = {};
+  bool _loadingProgress = true;
 
   @override
   void initState() {
@@ -30,30 +31,43 @@ class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadAllAlbumProgress());
   }
 
-  /// Load cached progress for every album.
+  /// Load progress for every album (cache first, Firebase fallback).
   Future<void> _loadAllAlbumProgress() async {
     final auth = context.read<AuthService>();
     if (!auth.isLoggedIn) return;
 
-    // Pre-load all albums so totalStickersForAlbum() has data
-    for (final album in AlbumRepository.albums) {
-      await StickerRepository.loadAlbum(album);
+    if (mounted) {
+      setState(() => _loadingProgress = true);
     }
 
-    // Now read cached progress using the stored totals
-    for (final album in AlbumRepository.albums) {
-      final total = StickerRepository.totalStickersForAlbum(album.id) ?? 0;
-      final progress = await CollectionService.getCachedAlbumProgress(
-        auth.uid,
-        album.id,
-        total,
-      );
+    final collection = context.read<CollectionService>();
 
-      if (mounted) {
-        setState(() {
-          _albumProgress[album.id] = progress;
-        });
-      }
+    // Pre-load all albums so totalStickersForAlbum() has data
+    await Future.wait(
+      AlbumRepository.albums.map(StickerRepository.loadAlbum),
+    );
+
+    if (!mounted) return;
+
+    final results = await Future.wait(
+      AlbumRepository.albums.map((album) async {
+        final total = StickerRepository.totalStickersForAlbum(album.id) ?? 0;
+        final progress = await collection.loadAlbumProgress(
+          auth.uid,
+          album.id,
+          total,
+        );
+        return MapEntry(album.id, progress);
+      }),
+    );
+
+    if (mounted) {
+      setState(() {
+        for (final entry in results) {
+          _albumProgress[entry.key] = entry.value;
+        }
+        _loadingProgress = false;
+      });
     }
 
     // Also use live CollectionService data for the active album
@@ -236,9 +250,12 @@ class _AlbumSelectScreenState extends State<AlbumSelectScreen> {
                           child: _AlbumRow(
                             album: album,
                             collected: _albumProgress[album.id]?['collected'] ?? 0,
-                            total: _albumProgress[album.id]?['total'] ?? 0,
+                            total: _albumProgress[album.id]?['total'] ??
+                                StickerRepository.totalStickersForAlbum(album.id) ??
+                                0,
                             totalCategories: StickerRepository.totalCategoriesForAlbum(album.id) ?? 0,
                             totalPages: StickerRepository.totalPagesForAlbum(album.id) ?? 0,
+                            isLoadingProgress: _loadingProgress,
                             onTap: () => _openAlbum(context, album),
                           ),
                         ),
@@ -266,6 +283,7 @@ class _AlbumRow extends StatefulWidget {
   final int total;
   final int totalCategories;
   final int totalPages;
+  final bool isLoadingProgress;
   final VoidCallback onTap;
 
   const _AlbumRow({
@@ -274,6 +292,7 @@ class _AlbumRow extends StatefulWidget {
     required this.total,
     required this.totalCategories,
     required this.totalPages,
+    this.isLoadingProgress = false,
     required this.onTap,
   });
 
@@ -307,10 +326,11 @@ class _AlbumRowState extends State<_AlbumRow>
 
   @override
   Widget build(BuildContext context) {
+    final loading = widget.isLoadingProgress;
     final progress =
-        widget.total > 0 ? widget.collected / widget.total : 0.0;
+        !loading && widget.total > 0 ? widget.collected / widget.total : 0.0;
     final pct = (progress * 100).toStringAsFixed(1);
-    final isComplete = progress >= 1.0;
+    final isComplete = !loading && progress >= 1.0;
 
     return AnimatedBuilder(
       animation: _scaleAnim,
@@ -416,7 +436,7 @@ class _AlbumRowState extends State<_AlbumRow>
                       ClipRRect(
                         borderRadius: BorderRadius.circular(3),
                         child: LinearProgressIndicator(
-                          value: progress,
+                          value: loading ? null : progress,
                           backgroundColor: AppColors.cardBorderUncollected,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             isComplete
@@ -432,7 +452,9 @@ class _AlbumRowState extends State<_AlbumRow>
                       Row(
                         children: [
                           Text(
-                            '${widget.collected}/${widget.total}',
+                            loading
+                                ? '--/${widget.total}'
+                                : '${widget.collected}/${widget.total}',
                             style: GoogleFonts.orbitron(
                               color: isComplete
                                   ? AppColors.goalGold
@@ -443,7 +465,7 @@ class _AlbumRowState extends State<_AlbumRow>
                           ),
                           const Spacer(),
                           Text(
-                            '$pct%',
+                            loading ? '--' : '$pct%',
                             style: GoogleFonts.orbitron(
                               color: isComplete
                                   ? AppColors.goalGold

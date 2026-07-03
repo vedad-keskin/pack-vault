@@ -53,6 +53,46 @@ class CollectionService extends ChangeNotifier {
     return {'collected': 0, 'total': totalStickers};
   }
 
+  /// Resolve album progress: local cache first, then Firebase fallback.
+  /// Used by AlbumSelectScreen on first login when SharedPreferences is empty.
+  Future<Map<String, int>> loadAlbumProgress(
+      String uid, String albumId, int totalStickers) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_cacheKey(uid, albumId));
+      if (jsonStr != null) {
+        final Map<String, dynamic> decoded = json.decode(jsonStr);
+        final collected = decoded.values.where((v) => v == true).length;
+        return {'collected': collected, 'total': totalStickers};
+      }
+
+      await _migrateIfNeeded(uid, albumId);
+      final stickers = await _datasource.getAlbumStickers(uid, albumId);
+      if (stickers.isNotEmpty) {
+        await _saveAlbumToLocal(uid, albumId, stickers);
+      }
+      final collected = stickers.values.where((v) => v).length;
+      return {'collected': collected, 'total': totalStickers};
+    } catch (e) {
+      debugPrint('loadAlbumProgress error: $e');
+      return {'collected': 0, 'total': totalStickers};
+    }
+  }
+
+  /// Persist sticker map for a specific album (no active-album state required).
+  Future<void> _saveAlbumToLocal(
+      String uid, String albumId, Map<String, bool> stickers) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final Map<String, dynamic> encoded = stickers.map(
+        (k, v) => MapEntry(k, v),
+      );
+      await prefs.setString(_cacheKey(uid, albumId), json.encode(encoded));
+    } catch (e) {
+      debugPrint('Album local save error: $e');
+    }
+  }
+
   /// Load stickers from SharedPreferences cache for instant startup display.
   Future<void> _loadFromLocal(String uid, String albumId) async {
     try {
